@@ -1,0 +1,20 @@
+{
+  "name": "access-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mdb-reader": "^1.0.10",
+    "node-adodb": "^5.0.3",
+    "odbc": "^2.4.1"
+  },
+  "devDependencies": {
+    "ts-node": "^10.4.0"
+  }
+}
