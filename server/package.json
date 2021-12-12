@@ -1,0 +1,29 @@
+{
+  "name": "access-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "luxon": "^2.2.0",
+    "mdb-reader": "^1.0.10",
+    "node-adodb": "^5.0.3",
+    "odbc": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/luxon": "^2.0.7",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.4.0"
+  }
+}

@@ -3,10 +3,13 @@ import pingRouter from "./routes/ping";
 import testRouter from "./routes/test";
 import formDataRouter from "./routes/formData";
 import insertRouter from "./routes/insert";
+import cors from "cors";
+import { resolve } from "path";
 
-require("dotenv").config();
+require("dotenv").config({ path: resolve(__dirname, "..", ".env") });
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT ?? 4000;

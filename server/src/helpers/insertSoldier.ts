@@ -50,7 +50,7 @@ export const insertSoldier = async ({
   major_fk: string | number;
 }) => {
   const constantFields = {
-    // user: "Web App",
+    "[user]": "مركز تد الاشارة رقم2 _ مستخدم1",
     unit_fk: "0",
     psychological: "0",
     military_status: "2",
@@ -63,6 +63,12 @@ export const insertSoldier = async ({
     mrkz_tadreeb: "1167205002",
     daraga_saek: 0,
   };
+
+  // Validations
+  if (national_no.toString().length !== 14)
+    throw new Error("the national id isn't 14 characters long");
+  else if (military_no.toString().length !== 13)
+    throw new Error("the military number isn't 13 characters long");
 
   const birth_date = getBirthDateFromNationalId(national_no);
   const moahel_code = await getMoahelFromMilitaryNumber(military_no);

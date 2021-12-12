@@ -4,22 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node index.ts"
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:start\"",
+    "server:dev": "npm run dev --prefix server",
+    "client:start": "npm run start --prefix client"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/osamaadam/access-manager.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "luxon": "^2.2.0",
-    "mdb-reader": "^1.0.10",
-    "node-adodb": "^5.0.3",
-    "odbc": "^2.4.1"
+  "bugs": {
+    "url": "https://github.com/osamaadam/access-manager/issues"
   },
+  "homepage": "https://github.com/osamaadam/access-manager#readme",
   "devDependencies": {
-    "@types/express": "^4.17.13",
-    "@types/luxon": "^2.0.7",
-    "ts-node": "^10.4.0"
+    "prettier": "^2.5.1"
+  },
+  "dependencies": {
+    "concurrently": "^6.4.0"
   }
 }
