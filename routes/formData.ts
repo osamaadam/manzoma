@@ -77,7 +77,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-const getMoahel = async () => {
+export const getMoahel = async () => {
   const queryString = `
     select moahel_code as id, moahel_name as name
     from moahel_type
