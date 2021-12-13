@@ -10,7 +10,7 @@ export const insertSoldier = async ({
   governorate_fk,
   health,
   marital_state,
-  mehna,
+  mehna = "NULL",
   military_no,
   mrhla,
   national_no,
@@ -46,7 +46,7 @@ export const insertSoldier = async ({
   rel_address: string;
   tagneed_factor: number;
   etgah: number;
-  mehna: string | null;
+  mehna?: string;
   major_fk: string | number;
 }) => {
   const constantFields = {
@@ -107,7 +107,8 @@ export const insertSoldier = async ({
       tasreh_date,
       serial,
       tagneed_factor,
-      updat)
+      updat,
+      job_description_fk)
     values (
       ${Object.values(constantFields)
         .map((val) => (typeof val === "string" ? `'${val}'` : val))
@@ -138,7 +139,8 @@ export const insertSoldier = async ({
       #${DateTime.fromFormat(tasreh_date, "d/M/yyyy").toISODate()}#,
       ${serial},
       ${tagneed_factor},
-      now())
+      now(),
+      null)
   `;
 
   return executeQuery(queryString);

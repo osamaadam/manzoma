@@ -5,6 +5,9 @@ const router = Router();
 
 router.post("/", async (req, res) => {
   const {
+    soldier_name,
+    rel_address,
+    rel_name,
     address,
     blood_type,
     center_code,
@@ -16,13 +19,9 @@ router.post("/", async (req, res) => {
     military_no,
     mrhla,
     national_no,
-    rel_address,
-    rel_degree,
-    rel_name,
     religion_code,
     segl_no,
     solasy_no,
-    soldier_name,
     tagneed_date,
     tagneed_factor,
     tasgeel_date,
@@ -43,13 +42,12 @@ router.post("/", async (req, res) => {
     religion_code: number;
     marital_state: number;
     national_no: string | number;
-    rel_name: string;
-    rel_degree: string;
-    rel_address: string;
     tagneed_factor: number;
     etgah: number;
-    mehna: string | null;
+    mehna?: string;
     major_fk: string | number;
+    rel_address: string;
+    rel_name: string;
   } = req.body;
 
   try {
@@ -66,7 +64,7 @@ router.post("/", async (req, res) => {
       mrhla,
       national_no,
       rel_address,
-      rel_degree,
+      rel_degree: "الاب",
       rel_name,
       religion_code,
       segl_no,

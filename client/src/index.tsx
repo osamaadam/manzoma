@@ -1,14 +1,19 @@
+import { ConfigProvider } from "antd";
+import "antd/dist/antd.css";
+import arEG from "antd/lib/locale/ar_EG";
+import axios from "axios";
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
-import "antd/dist/antd.css";
-import axios from "axios";
+import "./index.less";
 
 axios.defaults.baseURL = "http://localhost:4000";
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ConfigProvider locale={arEG} direction="rtl">
+      <App />
+    </ConfigProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
