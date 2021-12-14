@@ -1,6 +1,6 @@
 export const removeArabicDialicts = (text: string) => {
   const arabicNormChar = {
-    ك: "ک",
+    ک: "ك",
     ﻷ: "لا",
     // ؤ: "و",
     ى: "ی",

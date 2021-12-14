@@ -53,7 +53,6 @@ const NewComersForm = () => {
     });
 
     setMajorOpts(data);
-    console.log(data);
   };
 
   const fetchFormData = async () => {
@@ -269,11 +268,9 @@ const NewComersForm = () => {
           <Select
             showSearch
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             onSelect={fetchCenters}
             disabled={!govs.length}
@@ -295,11 +292,9 @@ const NewComersForm = () => {
           <Select
             showSearch
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             disabled={!centerOpts.length}
             onSelect={(val, opt) => {
@@ -338,11 +333,9 @@ const NewComersForm = () => {
           <Select
             showSearch
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             disabled={!religionOpts.length}
           >
@@ -361,11 +354,9 @@ const NewComersForm = () => {
           <Select
             showSearch
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             disabled={!bloodTypes.length}
           >
@@ -384,11 +375,9 @@ const NewComersForm = () => {
           <Select
             showSearch
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             disabled={!maritalStates.length}
           >
@@ -471,11 +460,9 @@ const NewComersForm = () => {
           <Select
             showSearch
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             disabled={!etgahOpts.length}
           >
@@ -492,11 +479,9 @@ const NewComersForm = () => {
           <Select
             showSearch
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             disabled={!healthOpts.length}
           >
@@ -522,11 +507,9 @@ const NewComersForm = () => {
           <Select
             showSearch
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             disabled={!tagneedFactors.length}
           >
@@ -555,11 +538,9 @@ const NewComersForm = () => {
             showSearch
             allowClear
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             disabled={!jobOpts.length}
           >
@@ -581,11 +562,9 @@ const NewComersForm = () => {
           <Select
             showSearch
             filterOption={(input, option) => {
-              return (
-                removeArabicDialicts(option?.title)
-                  .toLocaleLowerCase()
-                  .indexOf(input.toLowerCase()) >= 0
-              );
+              const normalizedOption = removeArabicDialicts(option?.title);
+              const normalizedInput = removeArabicDialicts(input);
+              return normalizedOption.indexOf(normalizedInput) >= 0;
             }}
             disabled={!majorOpts.length}
           >
