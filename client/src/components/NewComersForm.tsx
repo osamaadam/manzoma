@@ -1,9 +1,10 @@
 import {
   Button,
   DatePicker,
+  Divider,
   Form,
   Input,
-  InputNumber,
+  message,
   Select,
   Spin,
 } from "antd";
@@ -11,6 +12,8 @@ import axios from "axios";
 import { DateTime } from "luxon";
 import moment from "moment";
 import React from "react";
+import { generateRelAddress } from "../helpers/generateRelAddress";
+import { removeArabicDialicts } from "../helpers/removeArabicDialicts";
 import "./form.less";
 
 const { Option } = Select;
@@ -32,7 +35,6 @@ const NewComersForm = () => {
   );
   const [etgahOpts, setEtgahOpts] = React.useState<GenericFormData[]>([]);
   const [jobOpts, setJobOpts] = React.useState<GenericFormData[]>([]);
-  const [curMoahelId, setCurMoahelId] = React.useState<string | number>();
   const [majorOpts, setMajorOpts] = React.useState<Major[]>([]);
   const [centerOpts, setCenterOpts] = React.useState<Center[]>([]);
   const [solasyFirst, setSolasyFirst] = React.useState<number>();
@@ -42,10 +44,6 @@ const NewComersForm = () => {
   React.useEffect(() => {
     fetchFormData();
   }, []);
-
-  React.useEffect(() => {
-    if (curMoahelId) fetchMajors(curMoahelId);
-  }, [curMoahelId]);
 
   const fetchMajors = async (moahelId: number | string) => {
     const { data } = await axios.get<Major[]>("/form-data/major", {
@@ -170,11 +168,13 @@ const NewComersForm = () => {
       tagneed_factor,
       tasgeel_date,
     } = values;
+    first_name = removeArabicDialicts(first_name);
+    parent_name = removeArabicDialicts(parent_name);
     const soldier_name = [first_name, parent_name].join(" ");
     const rel_name = parent_name;
     const governorate = govs.find((gov) => gov.id === governorate_fk)?.name;
     const center = centerOpts.find((center) => center.id === center_code)?.name;
-    const rel_address = [address, center, governorate].join(" - ");
+    const rel_address = generateRelAddress(address, center, governorate);
 
     tasgeel_date = moment(tasgeel_date).format("D/M/YYYY");
     tagneed_date = moment(tagneed_date).format("D/M/YYYY");
@@ -204,10 +204,21 @@ const NewComersForm = () => {
       mehna,
     };
 
-    console.log(postData);
+    message.config({
+      maxCount: 1,
+      rtl: true,
+    });
+
+    message.loading("يتم تسجيل المجند...");
+
     try {
       await axios.post("/insert", postData);
+      message.success("تم تسجيل المجند بنجاح");
     } catch (err) {
+      if (axios.isAxiosError(err)) {
+        console.log(err.response?.data.process.message);
+        message.error(err.response?.data.process.message);
+      }
       console.error(err);
     }
   };
@@ -231,6 +242,7 @@ const NewComersForm = () => {
       }}
       className="form"
     >
+      <Divider>البيانات الشخصية</Divider>
       <div className="form-items-container">
         <Form.Item name="first_name" label="الاسم الأول" required>
           <Input type="text" autoComplete="off" lang="ar" />
@@ -258,7 +270,7 @@ const NewComersForm = () => {
             showSearch
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );
@@ -284,7 +296,7 @@ const NewComersForm = () => {
             showSearch
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );
@@ -327,7 +339,7 @@ const NewComersForm = () => {
             showSearch
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );
@@ -350,7 +362,7 @@ const NewComersForm = () => {
             showSearch
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );
@@ -373,7 +385,7 @@ const NewComersForm = () => {
             showSearch
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );
@@ -399,6 +411,7 @@ const NewComersForm = () => {
           </Select>
         </Form.Item>
       </div>
+      <Divider>البيانات العسكرية</Divider>
       <div className="form-items-container">
         <Form.Item
           label="المرحلة"
@@ -459,7 +472,7 @@ const NewComersForm = () => {
             showSearch
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );
@@ -480,7 +493,7 @@ const NewComersForm = () => {
             showSearch
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );
@@ -510,7 +523,7 @@ const NewComersForm = () => {
             showSearch
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );
@@ -535,6 +548,7 @@ const NewComersForm = () => {
           <DatePicker format="D/M/YYYY" />
         </Form.Item>
       </div>
+      <Divider>البيانات المهنية و الأكاديمية</Divider>
       <div className="form-items-container">
         <Form.Item label="المهنة قبل التجنيد" name="mehna">
           <Select
@@ -542,7 +556,7 @@ const NewComersForm = () => {
             allowClear
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );
@@ -568,7 +582,7 @@ const NewComersForm = () => {
             showSearch
             filterOption={(input, option) => {
               return (
-                option?.title
+                removeArabicDialicts(option?.title)
                   .toLocaleLowerCase()
                   .indexOf(input.toLowerCase()) >= 0
               );

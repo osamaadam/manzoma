@@ -7,7 +7,7 @@ import ReactDOM from "react-dom";
 import App from "./App";
 import "./index.less";
 
-axios.defaults.baseURL = "http://localhost:4000";
+axios.defaults.baseURL = "http://dell:4000";
 
 ReactDOM.render(
   <React.StrictMode>
