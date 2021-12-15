@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "cross-env NODE_ENV=production npm start --prefix server",
+    "prestart": "npm run build",
+    "build": "npm run build --prefix server && npm run build --prefix client",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:start\"",
     "server:dev": "npm run dev --prefix server",
     "client:start": "npm run start --prefix client",
@@ -24,6 +27,7 @@
     "prettier": "^2.5.1"
   },
   "dependencies": {
-    "concurrently": "^6.4.0"
+    "concurrently": "^6.4.0",
+    "cross-env": "^7.0.3"
   }
 }

@@ -1,3 +1,5 @@
 node_modules/
 res.json
 .env
+client/build/
+server/dist/

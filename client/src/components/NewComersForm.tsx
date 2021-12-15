@@ -259,6 +259,22 @@ const NewComersForm = () => {
             {
               len: 14,
             },
+            {
+              validator: (_, val: number) => {
+                const national_no = val.toString();
+                if (national_no.length >= 13) {
+                  if (!(+national_no[12] % 2)) {
+                    return Promise.reject(
+                      new Error(
+                        "الرقم قبل الأخير يجب ان يكون فردي في حالة الذكور"
+                      )
+                    );
+                  } else {
+                    return Promise.resolve();
+                  }
+                } else return Promise.resolve();
+              },
+            },
           ]}
         >
           <Input type="number" autoComplete="off" onChange={guessSolasyThird} />
