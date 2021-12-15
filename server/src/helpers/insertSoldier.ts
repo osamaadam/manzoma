@@ -10,7 +10,7 @@ export const insertSoldier = async ({
   governorate_fk,
   health,
   marital_state,
-  mehna = "NULL",
+  mehna = 0,
   military_no,
   mrhla,
   national_no,
@@ -46,7 +46,7 @@ export const insertSoldier = async ({
   rel_address: string;
   tagneed_factor: number;
   etgah: number;
-  mehna?: string;
+  mehna?: number | string;
   major_fk: string | number;
 }) => {
   const constantFields = {
@@ -215,6 +215,7 @@ export const calculateTasrehDate = (
 
   if (!normalFactors.includes(+tagneedFactorId))
     tasreehDate = tasreehDate.plus({ months: 2 });
+  else tasreehDate = tasreehDate.plus({ months: 1 });
 
   return tasreehDate.toFormat("dd/MM/yyyy");
 };

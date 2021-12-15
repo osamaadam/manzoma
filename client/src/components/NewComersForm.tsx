@@ -58,7 +58,6 @@ const NewComersForm = () => {
   const fetchFormData = async () => {
     try {
       const { data } = await axios.get<BasicFormData>("/form-data");
-      console.log(data);
       setGovs(data.govs);
       setBloodTypes(data.bloodTypes);
       setHealthOpts(data.health);

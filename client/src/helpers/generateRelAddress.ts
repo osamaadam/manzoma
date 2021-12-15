@@ -1,13 +1,13 @@
 export const generateRelAddress = (
   address: string,
   center?: string,
-  governorate?: string
+  governorate?: string,
+  maxLength: number = 50
 ) => {
-  const fullAddress = [address, center, governorate].join(" - ");
-  const addressWithCenter = [address, center].join(" - ");
-  const MAX_LENGTH = 50;
+  const fullAddress = [address, center, governorate].join("-");
+  const addressWithCenter = [address, center].join("-");
 
-  if (fullAddress.length <= MAX_LENGTH) return fullAddress;
-  else if (addressWithCenter.length <= MAX_LENGTH) return addressWithCenter;
+  if (fullAddress.length <= maxLength) return fullAddress;
+  else if (addressWithCenter.length <= maxLength) return addressWithCenter;
   else return address;
 };

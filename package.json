@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run client:start\"",
     "server:dev": "npm run dev --prefix server",
-    "client:start": "npm run start --prefix client"
+    "client:start": "npm run start --prefix client",
+    "postinstall": "npm install --prefix client && npm install --prefix server"
   },
   "repository": {
     "type": "git",
