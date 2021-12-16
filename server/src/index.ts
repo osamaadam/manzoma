@@ -19,15 +19,6 @@ app.use("/test", testRouter);
 app.use("/form-data", formDataRouter);
 app.use("/insert", insertRouter);
 
-if (process.env.NODE_ENV === "production") {
-  const buildPath = resolve(__dirname, "..", "..", "client", "build");
-  const indexPath = resolve(buildPath, "index.html");
-  app.use(express.static(buildPath));
-  app.get("*", (req, res) => {
-    res.sendFile(indexPath);
-  });
-}
-
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
 });

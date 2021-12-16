@@ -8,9 +8,7 @@ import App from "./App";
 import "./index.less";
 
 axios.defaults.baseURL =
-  process.env.NODE_ENV === "production"
-    ? "http://dell:4000"
-    : "http://localhost:4000";
+  process.env.NODE_ENV === "production" ? "/api" : "http://localhost:4000";
 
 ReactDOM.render(
   <React.StrictMode>
