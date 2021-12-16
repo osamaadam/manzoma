@@ -18,9 +18,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "luxon": "^2.2.0",
-    "mdb-reader": "^1.0.10",
-    "node-adodb": "^5.0.3",
-    "odbc": "^2.4.1"
+    "node-adodb": "^5.0.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
