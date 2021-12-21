@@ -5,6 +5,7 @@ import formDataRouter from "./routes/formData";
 import insertRouter from "./routes/insert";
 import pingRouter from "./routes/ping";
 import testRouter from "./routes/test";
+import getRouter from "./routes/getSoldier";
 
 require("dotenv").config({ path: resolve(__dirname, "..", ".env") });
 
@@ -18,6 +19,7 @@ app.use("/ping", pingRouter);
 app.use("/test", testRouter);
 app.use("/form-data", formDataRouter);
 app.use("/insert", insertRouter);
+app.use("/get", getRouter);
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);

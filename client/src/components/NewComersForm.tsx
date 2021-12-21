@@ -8,6 +8,7 @@ import {
   Select,
   Spin,
 } from "antd";
+import { RuleObject } from "antd/lib/form";
 import axios from "axios";
 import { DateTime } from "luxon";
 import moment from "moment";
@@ -252,6 +253,7 @@ const NewComersForm = () => {
           label="الرقم القومي"
           name="national_no"
           required
+          validateTrigger="onBlur"
           rules={[
             {
               required: true,
@@ -274,6 +276,14 @@ const NewComersForm = () => {
                   }
                 } else return Promise.resolve();
               },
+            },
+            {
+              validator: (_, val) =>
+                fetchValidator(
+                  "national_no",
+                  val,
+                  "يوجد مجند بنفس الرقم القومي"
+                ),
             },
           ]}
         >
@@ -436,12 +446,21 @@ const NewComersForm = () => {
           label="الرقم العسكري"
           name="military_no"
           required
+          validateTrigger="onBlur"
           rules={[
             {
               required: true,
             },
             {
               len: 13,
+            },
+            {
+              validator: (_, val) =>
+                fetchValidator(
+                  "military_no",
+                  val,
+                  "يوجد مجند بنفس الرقم العسكري"
+                ),
             },
           ]}
         >
@@ -458,11 +477,20 @@ const NewComersForm = () => {
             {
               min: 3,
             },
+            {
+              validator: (_, val) =>
+                fetchValidator("segl_no", val, "يوجد مجند بنفس رقم السجل"),
+            },
           ]}
+          validateTrigger="onBlur"
         >
           <Input type="number" autoComplete="off" />
         </Form.Item>
-        <Form.Item name="solasy_no" label="الرقم الثلاثي">
+        <Form.Item
+          name="solasy_no"
+          dependencies={["national_no", "markaz"]}
+          label="الرقم الثلاثي"
+        >
           <SolasyNumber
             solasySecond={solasySecond}
             solasyThird={solasyThird}
@@ -573,7 +601,12 @@ const NewComersForm = () => {
               ))}
           </Select>
         </Form.Item>
-        <Form.Item label="التخصص" name="major_fk" required>
+        <Form.Item
+          label="التخصص"
+          name="major_fk"
+          required
+          dependencies={["military_no"]}
+        >
           <Select
             showSearch
             filterOption={(input, option) => {
@@ -609,6 +642,18 @@ const NewComersForm = () => {
       </Form.Item>
     </Form>
   );
+};
+
+const fetchValidator = async (
+  key: string,
+  value: string | number,
+  errorText: string
+) => {
+  const validationReq = await axios.get<BasicRow[]>("/get/soldier", {
+    params: { [key]: value },
+  });
+  if (validationReq.status === 204) return Promise.resolve();
+  else return Promise.reject(errorText);
 };
 
 const SolasyNumber = ({
@@ -673,6 +718,24 @@ interface Major extends GenericFormData {
 interface Center extends GenericFormData {
   gov: string;
   govId: number;
+}
+
+interface BasicRow {
+  soldier_name: string;
+  tasgeel_date: string;
+  segl_no: number;
+  address: string;
+  military_no: string;
+  national_no: string;
+  moahel_name: string;
+  gov_name: string;
+  major_name: string;
+  blood_type: string;
+  markaz: string;
+  deg_name: string;
+  religion_name: string;
+  fea_name: string;
+  tagneed_factor_name: string;
 }
 
 interface BasicFormData {
