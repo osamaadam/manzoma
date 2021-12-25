@@ -8,7 +8,7 @@ export const query = async <T>(query: string) => {
     throw new Error("connection string not set");
   }
 
-  const access = adodb.open(CONNECTION_STRING, false);
+  const access = adodb.open(CONNECTION_STRING);
 
   return access.query<T>(query);
 };

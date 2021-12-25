@@ -7,7 +7,7 @@ export const executeQuery = async <T>(query: string) => {
   if (!CONNECTION_STRING?.trim()) {
     throw new Error("connection string not set");
   }
-  const access = adodb.open(CONNECTION_STRING, false);
+  const access = adodb.open(CONNECTION_STRING);
 
   return access.execute<T>(query);
 };

@@ -8,7 +8,6 @@ import {
   Select,
   Spin,
 } from "antd";
-import { RuleObject } from "antd/lib/form";
 import axios from "axios";
 import { DateTime } from "luxon";
 import moment from "moment";
