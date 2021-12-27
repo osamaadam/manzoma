@@ -8,7 +8,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/print", (req, res) => {
-  res.send(calculateTasrehDate(20201, 2, 7));
+  res.send(req.url);
 });
 
 export default router;

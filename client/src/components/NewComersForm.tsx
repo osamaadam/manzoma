@@ -8,10 +8,9 @@ import {
   Select,
   Spin,
 } from "antd";
-import { RuleObject } from "antd/lib/form";
 import axios from "axios";
 import { DateTime } from "luxon";
-import moment from "moment";
+import moment, { Moment } from "moment";
 import React from "react";
 import { generateRelAddress } from "../helpers/generateRelAddress";
 import { removeArabicDialicts } from "../helpers/removeArabicDialicts";
@@ -23,6 +22,8 @@ const NewComersForm = () => {
   const [form] = Form.useForm();
 
   const [isLoading, setIsLoading] = React.useState(true);
+
+  const [serverTime, setServerTime] = React.useState<Moment>();
 
   const [govs, setGovs] = React.useState<GenericFormData[]>([]);
   const [bloodTypes, setBloodTypes] = React.useState<GenericFormData[]>([]);
@@ -43,8 +44,15 @@ const NewComersForm = () => {
   const [solasyThird, setSolasyThird] = React.useState<number>();
 
   React.useEffect(() => {
+    fetchServerTime();
     fetchFormData();
   }, []);
+
+  const fetchServerTime = async () => {
+    const { data } = await axios.get<string>("/time");
+    const momentObj = moment(data);
+    setServerTime(momentObj);
+  };
 
   const fetchMajors = async (moahelId: number | string) => {
     const { data } = await axios.get<Major[]>("/form-data/major", {
@@ -114,12 +122,11 @@ const NewComersForm = () => {
     }
   };
 
-  const guessMrhla = () => {
-    const { year, month } = DateTime.now();
+  const guessMrhla = React.useCallback(() => {
+    let mrhla = serverTime?.year().toString();
+    if (!mrhla) return undefined;
 
-    let mrhla = year.toString();
-
-    switch (month) {
+    switch (serverTime?.month()) {
       case 1:
       case 2:
       case 3:
@@ -143,7 +150,7 @@ const NewComersForm = () => {
     }
 
     return mrhla;
-  };
+  }, [serverTime]);
 
   const onFinish = async (values: FormData) => {
     let {
@@ -222,7 +229,7 @@ const NewComersForm = () => {
     }
   };
 
-  if (isLoading)
+  if (isLoading || !serverTime?.isValid())
     return (
       <div className="spinner-container">
         <Spin />
@@ -237,12 +244,12 @@ const NewComersForm = () => {
         religion: 1,
         marital_state: 0,
         mrhla: guessMrhla(),
-        tasgeel_date: moment(),
+        tasgeel_date: serverTime,
       }}
       className="form"
     >
-      <Divider>البيانات الشخصية</Divider>
       <div className="form-items-container">
+        <Divider>البيانات الشخصية</Divider>
         <Form.Item name="first_name" label="الاسم الأول" required>
           <Input type="text" autoComplete="off" lang="ar" />
         </Form.Item>
@@ -253,7 +260,6 @@ const NewComersForm = () => {
           label="الرقم القومي"
           name="national_no"
           required
-          validateTrigger="onBlur"
           rules={[
             {
               required: true,
@@ -282,7 +288,8 @@ const NewComersForm = () => {
                 fetchValidator(
                   "national_no",
                   val,
-                  "يوجد مجند بنفس الرقم القومي"
+                  "يوجد مجند بنفس الرقم القومي",
+                  14
                 ),
             },
           ]}
@@ -425,8 +432,8 @@ const NewComersForm = () => {
           </Select>
         </Form.Item>
       </div>
-      <Divider>البيانات العسكرية</Divider>
       <div className="form-items-container">
+        <Divider>البيانات العسكرية</Divider>
         <Form.Item
           label="المرحلة"
           name="mrhla"
@@ -446,7 +453,6 @@ const NewComersForm = () => {
           label="الرقم العسكري"
           name="military_no"
           required
-          validateTrigger="onBlur"
           rules={[
             {
               required: true,
@@ -459,7 +465,8 @@ const NewComersForm = () => {
                 fetchValidator(
                   "military_no",
                   val,
-                  "يوجد مجند بنفس الرقم العسكري"
+                  "يوجد مجند بنفس الرقم العسكري",
+                  13
                 ),
             },
           ]}
@@ -470,6 +477,7 @@ const NewComersForm = () => {
           label="رقم السجل"
           name="segl_no"
           required
+          validateTrigger="onBlur"
           rules={[
             {
               required: true,
@@ -479,10 +487,9 @@ const NewComersForm = () => {
             },
             {
               validator: (_, val) =>
-                fetchValidator("segl_no", val, "يوجد مجند بنفس رقم السجل"),
+                fetchValidator("segl_no", val, "يوجد مجند بنفس رقم السجل", 3),
             },
           ]}
-          validateTrigger="onBlur"
         >
           <Input type="number" autoComplete="off" />
         </Form.Item>
@@ -574,8 +581,8 @@ const NewComersForm = () => {
           <DatePicker format="D/M/YYYY" />
         </Form.Item>
       </div>
-      <Divider>البيانات المهنية و الأكاديمية</Divider>
       <div className="form-items-container">
+        <Divider>البيانات المهنية و الأكاديمية</Divider>
         <Form.Item label="المهنة قبل التجنيد" name="mehna">
           <Select
             showSearch
@@ -636,7 +643,12 @@ const NewComersForm = () => {
         </Form.Item>
       </div>
       <Form.Item>
-        <Button type="primary" htmlType="submit">
+        <Button
+          type="primary"
+          htmlType="submit"
+          formAction="submit"
+          className="form__submit-btn"
+        >
           تسجيل
         </Button>
       </Form.Item>
@@ -647,13 +659,17 @@ const NewComersForm = () => {
 const fetchValidator = async (
   key: string,
   value: string | number,
-  errorText: string
+  errorText: string,
+  lengthThreshold: number
 ) => {
-  const validationReq = await axios.get<BasicRow[]>("/get/soldier", {
-    params: { [key]: value },
-  });
-  if (validationReq.status === 204) return Promise.resolve();
-  else return Promise.reject(errorText);
+  if (value?.toString().length >= lengthThreshold) {
+    const validationReq = await axios.get<BasicRow[]>("/get/soldier", {
+      params: { [key]: value },
+    });
+    if (validationReq.status === 204) return Promise.resolve();
+    else return Promise.reject(errorText);
+  }
+  return Promise.resolve();
 };
 
 const SolasyNumber = ({
