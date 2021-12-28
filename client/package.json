@@ -1,6 +1,7 @@
 {
   "name": "client",
   "version": "0.1.0",
+  "homepage": "/access",
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.4.3",

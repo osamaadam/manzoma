@@ -1,9 +1,13 @@
 import { Router } from "express";
+import { DateTime } from "luxon";
 
 const router = Router();
 
 router.get("/", (req, res) => {
-  res.send(new Date().toISOString());
+  const curDate = DateTime.now().toISO({
+    includeOffset: true,
+  });
+  res.send(curDate);
 });
 
 export default router;
