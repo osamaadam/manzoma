@@ -75,8 +75,9 @@ export const insertSoldier = async ({
   if (!moahel_code) throw new Error("moahel not found");
   const tasreh_date = calculateTasrehDate(mrhla, moahel_code, tagneed_factor);
 
-  const serial =
-    segl_no >= 10 ? 10 : segl_no - +String(segl_no).substring(0, 2);
+  const seglNoWithoutPrefix = +segl_no.toString().substring(2);
+
+  const serial = seglNoWithoutPrefix >= 10 ? 10 : seglNoWithoutPrefix;
 
   const queryString = `
     insert into src_soldiers (

@@ -3,6 +3,7 @@ import {
   DatePicker,
   Divider,
   Form,
+  FormInstance,
   Input,
   message,
   Select,
@@ -42,6 +43,8 @@ const NewComersForm = () => {
   const [solasyFirst, setSolasyFirst] = React.useState<number>();
   const [solasySecond, setSolasySecond] = React.useState<number>();
   const [solasyThird, setSolasyThird] = React.useState<number>();
+  const [curPrefix, setCurPrefix] = React.useState<number>();
+  const [curMrhla, setCurMrhla] = React.useState<string>();
 
   React.useEffect(() => {
     fetchServerTime();
@@ -122,11 +125,22 @@ const NewComersForm = () => {
     }
   };
 
+  React.useEffect(() => {
+    const curMrhla = guessMrhla();
+    if (curMrhla) {
+      setCurMrhla(curMrhla);
+      if (curMrhla.length === 5) setCurPrefix(+("2" + curMrhla[4]));
+    }
+  }, [serverTime]);
+
   const guessMrhla = React.useCallback(() => {
     let mrhla = serverTime?.year().toString();
     if (!mrhla) return undefined;
 
-    switch (serverTime?.month()) {
+    const curMonth = Number(serverTime?.month()) + 1;
+    let prefix = "2";
+
+    switch (curMonth) {
       case 1:
       case 2:
       case 3:
@@ -243,7 +257,7 @@ const NewComersForm = () => {
       initialValues={{
         religion: 1,
         marital_state: 0,
-        mrhla: guessMrhla(),
+        mrhla: curMrhla,
         tasgeel_date: serverTime,
       }}
       className="form"
@@ -454,7 +468,16 @@ const NewComersForm = () => {
               },
             ]}
           >
-            <Input type="number" autoComplete="off" />
+            <Input
+              type="number"
+              value={curMrhla}
+              onChange={(e) => {
+                const curMrhla = e.currentTarget.value;
+                setCurMrhla(curMrhla);
+                if (curMrhla.length === 5) setCurPrefix(+("2" + curMrhla[4]));
+              }}
+              autoComplete="off"
+            />
           </Form.Item>
           <Form.Item
             label="الرقم العسكري"
@@ -498,7 +521,7 @@ const NewComersForm = () => {
               },
             ]}
           >
-            <Input type="number" autoComplete="off" />
+            <SeglNoInput form={form} prefix={curPrefix} />
           </Form.Item>
           <Form.Item
             name="solasy_no"
@@ -728,6 +751,36 @@ const SolasyNumber = ({
     />
   </Input.Group>
 );
+
+const SeglNoInput = ({
+  form,
+  prefix,
+}: {
+  form: FormInstance<any>;
+  prefix?: number;
+}) => {
+  return (
+    <Input.Group compact>
+      <Input
+        type="number"
+        autoComplete="off"
+        style={{ width: "6rem" }}
+        onChange={(e) => {
+          const realVal = prefix?.toString() + e.currentTarget.value.toString();
+          console.log(realVal);
+          form.setFieldsValue({
+            segl_no: realVal,
+          });
+        }}
+      />
+      <Input
+        disabled
+        value={prefix}
+        style={{ width: "2.5rem", backgroundColor: "inherit" }}
+      />
+    </Input.Group>
+  );
+};
 
 export default NewComersForm;
 
