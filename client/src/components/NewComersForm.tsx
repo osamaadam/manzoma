@@ -188,17 +188,17 @@ const NewComersForm = () => {
       tagneed_factor,
       tasgeel_date,
     } = values;
-    first_name = removeArabicDialicts(first_name);
-    parent_name = removeArabicDialicts(parent_name);
+    first_name = removeArabicDialicts(first_name).trim();
+    parent_name = removeArabicDialicts(parent_name).trim();
     const soldier_name = [first_name, parent_name].join(" ");
-    const rel_name = parent_name;
+    const rel_name = parent_name.trim();
     const governorate = govs.find((gov) => gov.id === governorate_fk)?.name;
     const center = centerOpts.find((center) => center.id === center_code)?.name;
-    const rel_address = generateRelAddress(address, center, governorate);
+    const rel_address = generateRelAddress(address, center, governorate).trim();
 
     tasgeel_date = moment(tasgeel_date).format("D/M/YYYY");
     tagneed_date = moment(tagneed_date).format("D/M/YYYY");
-    const solasy_no = [solasyFirst, solasySecond, solasyThird].join("/");
+    const solasy_no = [solasyFirst, solasySecond, solasyThird].join("/").trim();
 
     const postData: PostData = {
       address,
