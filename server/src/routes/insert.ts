@@ -50,11 +50,6 @@ router.post("/", async (req, res) => {
     rel_name: string;
   } = req.body;
 
-  soldier_name = removeArabicDialicts(soldier_name).trim();
-  rel_name = removeArabicDialicts(rel_name).trim();
-  address = removeArabicDialicts(address).trim();
-  rel_address = removeArabicDialicts(rel_address).trim();
-
   try {
     await insertSoldier({
       address,
