@@ -2,17 +2,12 @@ export const removeArabicDialicts = (text: string) => {
   const arabicNormChar = {
     ک: "ك",
     ﻷ: "لا",
-    // ؤ: "و",
-    ى: "ی",
-    ي: "ی",
-    // ئ: "ی",
     أ: "ا",
     إ: "ا",
     آ: "ا",
     ٱ: "ا",
     ٳ: "ا",
     ة: "ه",
-    // ء: "",
     "ِ": "",
     "ْ": "",
     "ُ": "",
@@ -28,6 +23,8 @@ export const removeArabicDialicts = (text: string) => {
   };
 
   return text
+    .replace(/ي\s+/g, "ى ")
+    .replace(/ي$/g, "ى")
     .replace(/[^\u0000-\u007E]/g, (a) => {
       // @ts-ignore
       let retval = arabicNormChar[a];
