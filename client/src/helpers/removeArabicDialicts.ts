@@ -8,18 +8,6 @@ export const removeArabicDialicts = (text: string) => {
     ٱ: "ا",
     ٳ: "ا",
     ة: "ه",
-    "ِ": "",
-    "ْ": "",
-    "ُ": "",
-    "َ": "",
-    "ّ": "",
-    "ٍ": "",
-    "ً": "",
-    "ٌ": "",
-    "ٓ": "",
-    "ٰ": "",
-    "ٔ": "",
-    "�": "",
   };
 
   return text
@@ -32,7 +20,5 @@ export const removeArabicDialicts = (text: string) => {
         retval = a;
       }
       return retval;
-    })
-    .normalize("NFKD")
-    .toLowerCase();
+    });
 };

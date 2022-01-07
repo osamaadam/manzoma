@@ -138,7 +138,6 @@ const NewComersForm = () => {
     if (!mrhla) return undefined;
 
     const curMonth = Number(serverTime?.month()) + 1;
-    let prefix = "2";
 
     switch (curMonth) {
       case 1:
