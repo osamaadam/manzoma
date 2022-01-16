@@ -498,6 +498,18 @@ const NewComersForm = () => {
                     13
                   ),
               },
+              {
+                validator: (_, val?: string | number) => {
+                  const militaryNum = val?.toString();
+                  if (militaryNum && militaryNum.length >= 8) {
+                    const selahCode = militaryNum.substring(6, 8);
+                    if (+selahCode !== 16)
+                      return Promise.reject("الكود الخاص بسلاح الإشارة هو 16");
+                  }
+                  return Promise.resolve();
+                },
+                warningOnly: true,
+              },
             ]}
           >
             <Input type="number" autoComplete="off" onChange={deduceMoahel} />

@@ -2,10 +2,10 @@ import cors from "cors";
 import express from "express";
 import { resolve } from "path";
 import formDataRouter from "./routes/formData";
+import getRouter from "./routes/getSoldier";
 import insertRouter from "./routes/insert";
 import pingRouter from "./routes/ping";
 import testRouter from "./routes/test";
-import getRouter from "./routes/getSoldier";
 import timeRouter from "./routes/time";
 
 require("dotenv").config({ path: resolve(__dirname, "..", ".env") });
