@@ -125,14 +125,6 @@ const NewComersForm = () => {
     }
   };
 
-  React.useEffect(() => {
-    const curMrhla = guessMrhla();
-    if (curMrhla) {
-      setCurMrhla(curMrhla);
-      if (curMrhla.length === 5) setCurPrefix(+("2" + curMrhla[4]));
-    }
-  }, [serverTime]);
-
   const guessMrhla = React.useCallback(() => {
     let mrhla = serverTime?.year().toString();
     if (!mrhla) return undefined;
@@ -164,6 +156,14 @@ const NewComersForm = () => {
 
     return mrhla;
   }, [serverTime]);
+
+  React.useEffect(() => {
+    const curMrhla = guessMrhla();
+    if (curMrhla) {
+      setCurMrhla(curMrhla);
+      if (curMrhla.length === 5) setCurPrefix(+("2" + curMrhla[4]));
+    }
+  }, [guessMrhla, serverTime]);
 
   const onFinish = async (values: FormData) => {
     let {

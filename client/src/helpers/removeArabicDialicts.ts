@@ -10,15 +10,18 @@ export const removeArabicDialicts = (text: string) => {
     ة: "ه",
   };
 
-  return text
-    .replace(/ي\s+/g, "ى ")
-    .replace(/ي$/g, "ى")
-    .replace(/[^\u0000-\u007E]/g, (a) => {
-      // @ts-ignore
-      let retval = arabicNormChar[a];
-      if (retval === undefined) {
-        retval = a;
-      }
-      return retval;
-    });
+  return (
+    text
+      .replace(/ي\s+/g, "ى ")
+      .replace(/ي$/g, "ى")
+      // eslint-disable-next-line
+      .replace(/[^\u0000-\u007E]/g, (a) => {
+        // @ts-ignore
+        let retval = arabicNormChar[a];
+        if (retval === undefined) {
+          retval = a;
+        }
+        return retval;
+      })
+  );
 };
