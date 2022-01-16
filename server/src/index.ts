@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import { resolve } from "path";
 import formDataRouter from "./routes/formData";
+import rasdRouter from "./routes/gendoc";
 import getRouter from "./routes/getSoldier";
 import insertRouter from "./routes/insert";
 import pingRouter from "./routes/ping";
@@ -22,6 +23,7 @@ app.use("/form-data", formDataRouter);
 app.use("/insert", insertRouter);
 app.use("/get", getRouter);
 app.use("/time", timeRouter);
+app.use("/rasd", rasdRouter);
 
 app.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
