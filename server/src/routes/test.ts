@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
   );
 
   const queryString = `
-      select 
+      select
         soldier_name,
         format(tasgeel_date, 'short date') as tasgeel_date,
         segl_no,
