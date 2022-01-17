@@ -1,13 +1,17 @@
 import adodb from "node-adodb";
+import { genConnectionString } from "./genConnectionString";
 
 require("dotenv").config();
 
 export const executeQuery = async <T>(query: string) => {
-  const { CONNECTION_STRING } = process.env;
-  if (!CONNECTION_STRING?.trim()) {
-    throw new Error("connection string not set");
+  const { MDB_PATH } = process.env;
+  if (!MDB_PATH?.trim()) {
+    throw new Error("MDB_PATH is not set");
   }
-  const access = adodb.open(CONNECTION_STRING, false);
+
+  const connectionString = genConnectionString(MDB_PATH);
+
+  const access = adodb.open(connectionString, false);
 
   return access.execute<T>(query);
 };
