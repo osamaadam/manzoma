@@ -249,454 +249,467 @@ const NewComersForm = () => {
       </div>
     );
   return (
-    <Form
-      form={form}
-      layout="inline"
-      onFinish={onFinish}
-      initialValues={{
-        religion: 1,
-        marital_state: 0,
-        mrhla: curMrhla,
-        tasgeel_date: serverTime,
-      }}
-      className="form"
-    >
-      <div className="form-items-container">
-        <Divider>البيانات الشخصية</Divider>
-        <div className="form-items-container__inner-container">
-          <Form.Item name="first_name" label="الاسم الأول" required>
-            <Input autoFocus type="text" autoComplete="off" lang="ar" />
-          </Form.Item>
-          <Form.Item name="parent_name" label="اسم الأب" required>
-            <Input type="text" autoComplete="off" lang="ar" />
-          </Form.Item>
-          <Form.Item
-            label="الرقم القومي"
-            name="national_no"
-            required
-            rules={[
-              {
-                required: true,
-              },
-              {
-                len: 14,
-              },
-              {
-                validator: (_, val: number) => {
-                  const national_no = val.toString();
-                  if (national_no.length >= 13) {
-                    if (!(+national_no[12] % 2)) {
-                      return Promise.reject(
-                        new Error(
-                          "الرقم قبل الأخير يجب ان يكون فردي في حالة الذكور"
-                        )
-                      );
-                    } else {
-                      return Promise.resolve();
+    <div className="form-container">
+      <Form
+        form={form}
+        layout="inline"
+        onFinish={onFinish}
+        initialValues={{
+          religion: 1,
+          marital_state: 0,
+          mrhla: curMrhla,
+          tasgeel_date: serverTime,
+        }}
+        className="form"
+      >
+        <div className="form-items-container">
+          <Divider>البيانات الشخصية</Divider>
+          <div className="form-items-container__inner-container">
+            <Form.Item name="first_name" label="الاسم الأول" required>
+              <Input autoFocus type="text" autoComplete="off" lang="ar" />
+            </Form.Item>
+            <Form.Item name="parent_name" label="اسم الأب" required>
+              <Input type="text" autoComplete="off" lang="ar" />
+            </Form.Item>
+            <Form.Item
+              label="الرقم القومي"
+              name="national_no"
+              required
+              rules={[
+                {
+                  required: true,
+                },
+                {
+                  len: 14,
+                },
+                {
+                  validator: (_, val: number) => {
+                    const national_no = val.toString();
+                    if (national_no.length >= 13) {
+                      if (!(+national_no[12] % 2)) {
+                        return Promise.reject(
+                          new Error(
+                            "الرقم قبل الأخير يجب ان يكون فردي في حالة الذكور"
+                          )
+                        );
+                      } else {
+                        return Promise.resolve();
+                      }
+                    } else return Promise.resolve();
+                  },
+                },
+                {
+                  validator: (_, val) =>
+                    fetchValidator(
+                      "national_no",
+                      val,
+                      "يوجد مجند بنفس الرقم القومي",
+                      14
+                    ),
+                },
+              ]}
+            >
+              <Input
+                type="number"
+                autoComplete="off"
+                onChange={guessSolasyThird}
+              />
+            </Form.Item>
+            <Form.Item name="governorate_fk" label="المحافظة" required>
+              <Select
+                showSearch
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                onSelect={fetchCenters}
+                disabled={!govs.length}
+              >
+                {govs
+                  .sort((a, b) =>
+                    a.name
+                      .toLocaleLowerCase()
+                      .localeCompare(b.name.toLocaleLowerCase())
+                  )
+                  .map((gov) => (
+                    <Option value={gov.id} key={gov.id} title={gov.name}>
+                      {gov.name}
+                    </Option>
+                  ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name="center_code" label="القسم / المركز" required>
+              <Select
+                showSearch
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                disabled={!centerOpts.length}
+                onSelect={(val, opt) => {
+                  setSolasySecond(+opt.value);
+                }}
+              >
+                {centerOpts
+                  .sort((a, b) =>
+                    a.name
+                      .toLocaleLowerCase()
+                      .localeCompare(b.name.toLocaleLowerCase())
+                  )
+                  .map((centerOpt) => (
+                    <Option
+                      value={centerOpt.id}
+                      key={centerOpt.id}
+                      title={centerOpt.name}
+                    >
+                      {centerOpt.name} ({centerOpt.id})
+                    </Option>
+                  ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              label="العنوان"
+              name="address"
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+            >
+              <Input type="text" autoComplete="off" lang="ar" />
+            </Form.Item>
+            <Form.Item name="religion_code" label="الديانة" required>
+              <Select
+                showSearch
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                disabled={!religionOpts.length}
+              >
+                {religionOpts.map((religionOpt) => (
+                  <Option
+                    value={religionOpt.id}
+                    key={religionOpt.id}
+                    title={religionOpt.name}
+                  >
+                    {religionOpt.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item label="نوع الدم" name="blood_type" required>
+              <Select
+                showSearch
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                disabled={!bloodTypes.length}
+              >
+                {bloodTypes.map((bloodType) => (
+                  <Option
+                    value={bloodType.id}
+                    key={bloodType.id}
+                    title={bloodType.name}
+                  >
+                    {bloodType.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name="marital_state" label="الحالة الاجتماعية" required>
+              <Select
+                showSearch
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                disabled={!maritalStates.length}
+              >
+                {maritalStates
+                  .sort((a, b) =>
+                    a.name
+                      .toLocaleLowerCase()
+                      .trim()
+                      .localeCompare(b.name.toLocaleLowerCase().trim())
+                  )
+                  .map((maritalState) => (
+                    <Option
+                      value={maritalState.id}
+                      key={maritalState.id}
+                      title={maritalState.name}
+                    >
+                      {maritalState.name}
+                    </Option>
+                  ))}
+              </Select>
+            </Form.Item>
+          </div>
+        </div>
+        <div className="form-items-container">
+          <Divider>البيانات العسكرية</Divider>
+          <div className="form-items-container__inner-container">
+            <Form.Item
+              label="المرحلة"
+              name="mrhla"
+              required
+              rules={[
+                {
+                  required: true,
+                },
+                {
+                  len: 5,
+                },
+              ]}
+            >
+              <Input
+                type="number"
+                value={curMrhla}
+                onChange={(e) => {
+                  const curMrhla = e.currentTarget.value;
+                  setCurMrhla(curMrhla);
+                  if (curMrhla.length === 5) setCurPrefix(+("2" + curMrhla[4]));
+                }}
+                autoComplete="off"
+              />
+            </Form.Item>
+            <Form.Item
+              label="الرقم العسكري"
+              name="military_no"
+              required
+              rules={[
+                {
+                  required: true,
+                },
+                {
+                  len: 13,
+                },
+                {
+                  validator: (_, val) =>
+                    fetchValidator(
+                      "military_no",
+                      val,
+                      "يوجد مجند بنفس الرقم العسكري",
+                      13
+                    ),
+                },
+                {
+                  validator: (_, val?: string | number) => {
+                    const militaryNum = val?.toString();
+                    if (militaryNum && militaryNum.length >= 8) {
+                      const selahCode = militaryNum.substring(6, 8);
+                      if (+selahCode !== 16)
+                        return Promise.reject(
+                          "الكود الخاص بسلاح الإشارة هو 16"
+                        );
                     }
-                  } else return Promise.resolve();
+                    return Promise.resolve();
+                  },
+                  warningOnly: true,
                 },
-              },
-              {
-                validator: (_, val) =>
-                  fetchValidator(
-                    "national_no",
-                    val,
-                    "يوجد مجند بنفس الرقم القومي",
-                    14
-                  ),
-              },
-            ]}
-          >
-            <Input
-              type="number"
-              autoComplete="off"
-              onChange={guessSolasyThird}
-            />
-          </Form.Item>
-          <Form.Item name="governorate_fk" label="المحافظة" required>
-            <Select
-              showSearch
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              onSelect={fetchCenters}
-              disabled={!govs.length}
+              ]}
             >
-              {govs
-                .sort((a, b) =>
-                  a.name
-                    .toLocaleLowerCase()
-                    .localeCompare(b.name.toLocaleLowerCase())
-                )
-                .map((gov) => (
-                  <Option value={gov.id} key={gov.id} title={gov.name}>
-                    {gov.name}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="center_code" label="القسم / المركز" required>
-            <Select
-              showSearch
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              disabled={!centerOpts.length}
-              onSelect={(val, opt) => {
-                setSolasySecond(+opt.value);
-              }}
-            >
-              {centerOpts
-                .sort((a, b) =>
-                  a.name
-                    .toLocaleLowerCase()
-                    .localeCompare(b.name.toLocaleLowerCase())
-                )
-                .map((centerOpt) => (
-                  <Option
-                    value={centerOpt.id}
-                    key={centerOpt.id}
-                    title={centerOpt.name}
-                  >
-                    {centerOpt.name} ({centerOpt.id})
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="العنوان"
-            name="address"
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-          >
-            <Input type="text" autoComplete="off" lang="ar" />
-          </Form.Item>
-          <Form.Item name="religion_code" label="الديانة" required>
-            <Select
-              showSearch
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              disabled={!religionOpts.length}
-            >
-              {religionOpts.map((religionOpt) => (
-                <Option
-                  value={religionOpt.id}
-                  key={religionOpt.id}
-                  title={religionOpt.name}
-                >
-                  {religionOpt.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item label="نوع الدم" name="blood_type" required>
-            <Select
-              showSearch
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              disabled={!bloodTypes.length}
-            >
-              {bloodTypes.map((bloodType) => (
-                <Option
-                  value={bloodType.id}
-                  key={bloodType.id}
-                  title={bloodType.name}
-                >
-                  {bloodType.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="marital_state" label="الحالة الاجتماعية" required>
-            <Select
-              showSearch
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              disabled={!maritalStates.length}
-            >
-              {maritalStates
-                .sort((a, b) =>
-                  a.name
-                    .toLocaleLowerCase()
-                    .trim()
-                    .localeCompare(b.name.toLocaleLowerCase().trim())
-                )
-                .map((maritalState) => (
-                  <Option
-                    value={maritalState.id}
-                    key={maritalState.id}
-                    title={maritalState.name}
-                  >
-                    {maritalState.name}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-        </div>
-      </div>
-      <div className="form-items-container">
-        <Divider>البيانات العسكرية</Divider>
-        <div className="form-items-container__inner-container">
-          <Form.Item
-            label="المرحلة"
-            name="mrhla"
-            required
-            rules={[
-              {
-                required: true,
-              },
-              {
-                len: 5,
-              },
-            ]}
-          >
-            <Input
-              type="number"
-              value={curMrhla}
-              onChange={(e) => {
-                const curMrhla = e.currentTarget.value;
-                setCurMrhla(curMrhla);
-                if (curMrhla.length === 5) setCurPrefix(+("2" + curMrhla[4]));
-              }}
-              autoComplete="off"
-            />
-          </Form.Item>
-          <Form.Item
-            label="الرقم العسكري"
-            name="military_no"
-            required
-            rules={[
-              {
-                required: true,
-              },
-              {
-                len: 13,
-              },
-              {
-                validator: (_, val) =>
-                  fetchValidator(
-                    "military_no",
-                    val,
-                    "يوجد مجند بنفس الرقم العسكري",
-                    13
-                  ),
-              },
-              {
-                validator: (_, val?: string | number) => {
-                  const militaryNum = val?.toString();
-                  if (militaryNum && militaryNum.length >= 8) {
-                    const selahCode = militaryNum.substring(6, 8);
-                    if (+selahCode !== 16)
-                      return Promise.reject("الكود الخاص بسلاح الإشارة هو 16");
-                  }
-                  return Promise.resolve();
+              <Input type="number" autoComplete="off" onChange={deduceMoahel} />
+            </Form.Item>
+            <Form.Item
+              label="رقم السجل"
+              name="segl_no"
+              required
+              validateTrigger="onBlur"
+              rules={[
+                {
+                  required: true,
                 },
-                warningOnly: true,
-              },
-            ]}
-          >
-            <Input type="number" autoComplete="off" onChange={deduceMoahel} />
-          </Form.Item>
-          <Form.Item
-            label="رقم السجل"
-            name="segl_no"
-            required
-            validateTrigger="onBlur"
-            rules={[
-              {
-                required: true,
-              },
-              {
-                min: 3,
-              },
-              {
-                validator: (_, val) =>
-                  fetchValidator("segl_no", val, "يوجد مجند بنفس رقم السجل", 3),
-              },
-            ]}
-          >
-            <SeglNoInput form={form} prefix={curPrefix} />
-          </Form.Item>
-          <Form.Item
-            name="solasy_no"
-            dependencies={["national_no", "markaz"]}
-            label="الرقم الثلاثي"
-          >
-            <SolasyNumber
-              solasySecond={solasySecond}
-              solasyThird={solasyThird}
-              setSolasyFirst={setSolasyFirst}
-              setSolasySecond={setSolasySecond}
-              setSolasyThird={setSolasyThird}
-            />
-          </Form.Item>
-          <Form.Item label="الاتجاه" name="etgah" required>
-            <Select
-              showSearch
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              disabled={!etgahOpts.length}
+                {
+                  min: 3,
+                },
+                {
+                  validator: (_, val) =>
+                    fetchValidator(
+                      "segl_no",
+                      val,
+                      "يوجد مجند بنفس رقم السجل",
+                      3
+                    ),
+                },
+              ]}
             >
-              {etgahOpts
-                .sort((a, b) => +a.id - +b.id)
-                .map((etgah) => (
-                  <Option value={etgah.id} key={etgah.id} title={etgah.name}>
-                    {etgah.name}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="health" label="اللياقة" required>
-            <Select
-              showSearch
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              disabled={!healthOpts.length}
+              <SeglNoInput form={form} prefix={curPrefix} />
+            </Form.Item>
+            <Form.Item
+              name="solasy_no"
+              dependencies={["national_no", "markaz"]}
+              label="الرقم الثلاثي"
             >
-              {healthOpts
-                .sort((a, b) =>
-                  a.name
-                    .toLocaleLowerCase()
-                    .trim()
-                    .localeCompare(b.name.toLocaleLowerCase().trim())
-                )
-                .map((healthOpt) => (
+              <SolasyNumber
+                solasySecond={solasySecond}
+                solasyThird={solasyThird}
+                setSolasyFirst={setSolasyFirst}
+                setSolasySecond={setSolasySecond}
+                setSolasyThird={setSolasyThird}
+              />
+            </Form.Item>
+            <Form.Item label="الاتجاه" name="etgah" required>
+              <Select
+                showSearch
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                disabled={!etgahOpts.length}
+              >
+                {etgahOpts
+                  .sort((a, b) => +a.id - +b.id)
+                  .map((etgah) => (
+                    <Option value={etgah.id} key={etgah.id} title={etgah.name}>
+                      {etgah.name}
+                    </Option>
+                  ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name="health" label="اللياقة" required>
+              <Select
+                showSearch
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                disabled={!healthOpts.length}
+              >
+                {healthOpts
+                  .sort((a, b) =>
+                    a.name
+                      .toLocaleLowerCase()
+                      .trim()
+                      .localeCompare(b.name.toLocaleLowerCase().trim())
+                  )
+                  .map((healthOpt) => (
+                    <Option
+                      value={healthOpt.id}
+                      key={healthOpt.id}
+                      title={healthOpt.name}
+                    >
+                      {healthOpt.name}
+                    </Option>
+                  ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name="tagneed_factor" label="الحالة التجنيدية" required>
+              <Select
+                showSearch
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                disabled={!tagneedFactors.length}
+              >
+                {tagneedFactors.map((tagneedFactor) => (
                   <Option
-                    value={healthOpt.id}
-                    key={healthOpt.id}
-                    title={healthOpt.name}
+                    value={tagneedFactor.id}
+                    key={tagneedFactor.id}
+                    title={tagneedFactor.name}
                   >
-                    {healthOpt.name}
+                    {tagneedFactor.name}
                   </Option>
                 ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="tagneed_factor" label="الحالة التجنيدية" required>
-            <Select
-              showSearch
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              disabled={!tagneedFactors.length}
-            >
-              {tagneedFactors.map((tagneedFactor) => (
-                <Option
-                  value={tagneedFactor.id}
-                  key={tagneedFactor.id}
-                  title={tagneedFactor.name}
-                >
-                  {tagneedFactor.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="tasgeel_date" label="تاريخ التسجيل" required>
-            <DatePicker format="D/M/YYYY" />
-          </Form.Item>
-          <Form.Item name="tagneed_date" label="تاريخ التجنيد" required>
-            <DatePicker format="D/M/YYYY" />
-          </Form.Item>
+              </Select>
+            </Form.Item>
+            <Form.Item name="tasgeel_date" label="تاريخ التسجيل" required>
+              <DatePicker format="D/M/YYYY" />
+            </Form.Item>
+            <Form.Item name="tagneed_date" label="تاريخ التجنيد" required>
+              <DatePicker format="D/M/YYYY" />
+            </Form.Item>
+          </div>
         </div>
-      </div>
-      <div className="form-items-container">
-        <Divider>البيانات المهنية و الأكاديمية</Divider>
-        <div className="form-items-container__inner-container">
-          <Form.Item label="المهنة قبل التجنيد" name="mehna">
-            <Select
-              showSearch
-              allowClear
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              disabled={!jobOpts.length}
+        <div className="form-items-container">
+          <Divider>البيانات المهنية و الأكاديمية</Divider>
+          <div className="form-items-container__inner-container">
+            <Form.Item label="المهنة قبل التجنيد" name="mehna">
+              <Select
+                showSearch
+                allowClear
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                disabled={!jobOpts.length}
+              >
+                {jobOpts
+                  .sort((a, b) =>
+                    a.name
+                      .toLocaleLowerCase()
+                      .trim()
+                      .localeCompare(b.name.toLocaleLowerCase().trim())
+                  )
+                  .map((jobOpt) => (
+                    <Option
+                      value={jobOpt.id}
+                      key={jobOpt.id}
+                      title={jobOpt.name}
+                    >
+                      {jobOpt.name}
+                    </Option>
+                  ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              label="التخصص"
+              name="major_fk"
+              required
+              dependencies={["military_no"]}
             >
-              {jobOpts
-                .sort((a, b) =>
-                  a.name
-                    .toLocaleLowerCase()
-                    .trim()
-                    .localeCompare(b.name.toLocaleLowerCase().trim())
-                )
-                .map((jobOpt) => (
-                  <Option value={jobOpt.id} key={jobOpt.id} title={jobOpt.name}>
-                    {jobOpt.name}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="التخصص"
-            name="major_fk"
-            required
-            dependencies={["military_no"]}
+              <Select
+                showSearch
+                filterOption={(input, option) => {
+                  const normalizedOption = removeArabicDialicts(option?.title);
+                  const normalizedInput = removeArabicDialicts(input);
+                  return normalizedOption.indexOf(normalizedInput) >= 0;
+                }}
+                disabled={!majorOpts.length}
+              >
+                {majorOpts
+                  .sort((a, b) =>
+                    a.name
+                      .toLocaleLowerCase()
+                      .trim()
+                      .localeCompare(b.name.toLocaleLowerCase().trim())
+                  )
+                  .map((majorOpt) => (
+                    <Option
+                      value={majorOpt.id}
+                      key={majorOpt.id}
+                      title={majorOpt.name}
+                    >
+                      {majorOpt.name}
+                    </Option>
+                  ))}
+              </Select>
+            </Form.Item>
+          </div>
+        </div>
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            formAction="submit"
+            className="form__submit-btn"
           >
-            <Select
-              showSearch
-              filterOption={(input, option) => {
-                const normalizedOption = removeArabicDialicts(option?.title);
-                const normalizedInput = removeArabicDialicts(input);
-                return normalizedOption.indexOf(normalizedInput) >= 0;
-              }}
-              disabled={!majorOpts.length}
-            >
-              {majorOpts
-                .sort((a, b) =>
-                  a.name
-                    .toLocaleLowerCase()
-                    .trim()
-                    .localeCompare(b.name.toLocaleLowerCase().trim())
-                )
-                .map((majorOpt) => (
-                  <Option
-                    value={majorOpt.id}
-                    key={majorOpt.id}
-                    title={majorOpt.name}
-                  >
-                    {majorOpt.name}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-        </div>
-      </div>
-      <Form.Item>
-        <Button
-          type="primary"
-          htmlType="submit"
-          formAction="submit"
-          className="form__submit-btn"
-        >
-          تسجيل
-        </Button>
-      </Form.Item>
-    </Form>
+            تسجيل
+          </Button>
+        </Form.Item>
+      </Form>
+    </div>
   );
 };
 

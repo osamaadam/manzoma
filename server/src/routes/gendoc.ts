@@ -11,6 +11,11 @@ router.get("/docx", async (req, res) => {
 
   const docxBuf = await Packer.toBuffer(doc);
 
+  const filename = `${soldiers.length}-soldiers.docx`;
+
+  res.setHeader("filename", filename);
+  res.attachment(filename);
+
   res.send(docxBuf);
 });
 

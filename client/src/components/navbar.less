@@ -1,0 +1,25 @@
+@import "~antd/dist/antd.less";
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  list-style: none;
+  min-width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.5rem 1rem;
+  box-shadow: @box-shadow-base;
+  &__item {
+    text-decoration: none;
+    font-style: normal;
+    color: @link-color;
+    a {
+      color: @link-color;
+      &:hover {
+        color: @link-color;
+        filter: brightness(1.2);
+      }
+    }
+  }
+}
