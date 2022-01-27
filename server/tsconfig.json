@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es6",
+    "target": "ES2018",
     "allowJs": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -10,6 +10,9 @@
     "sourceMap": false,
     "outDir": "dist",
     "baseUrl": "src",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["ES2018", "ESNext.AsyncIterable"],
     "paths": {
       "*": ["../node_modules/*"]
     }

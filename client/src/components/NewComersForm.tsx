@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import { DateTime } from "luxon";
 import moment, { Moment } from "moment";
-import React from "react";
+import React, { useCallback } from "react";
 import { generateRelAddress } from "../helpers/generateRelAddress";
 import { removeArabicDialicts } from "../helpers/removeArabicDialicts";
 import "./form.less";
@@ -46,11 +46,6 @@ const NewComersForm = () => {
   const [curPrefix, setCurPrefix] = React.useState<number>();
   const [curMrhla, setCurMrhla] = React.useState<string>();
 
-  React.useEffect(() => {
-    fetchServerTime();
-    fetchFormData();
-  }, []);
-
   const fetchServerTime = async () => {
     const { data } = await axios.get<string>("/time");
     const momentObj = moment(data);
@@ -67,7 +62,7 @@ const NewComersForm = () => {
     setMajorOpts(data);
   };
 
-  const fetchFormData = async () => {
+  const fetchFormData = useCallback(async () => {
     try {
       const { data } = await axios.get<BasicFormData>("/form-data");
       setGovs(data.govs);
@@ -81,8 +76,14 @@ const NewComersForm = () => {
       setIsLoading(false);
     } catch (err) {
       console.error(err);
+      setTimeout(fetchFormData, 500);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    fetchServerTime();
+    fetchFormData();
+  }, [fetchFormData]);
 
   const deduceMoahel = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const militaryNumber = e.currentTarget.value.toString();

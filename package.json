@@ -1,5 +1,5 @@
 {
-  "name": "access-manager",
+  "name": "manzoma",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,15 +14,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/osamaadam/access-manager.git"
+    "url": "git+https://github.com/osamaadam/manzoma.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/osamaadam/access-manager/issues"
+    "url": "https://github.com/osamaadam/manzoma/issues"
   },
-  "homepage": "https://github.com/osamaadam/access-manager#readme",
+  "homepage": "https://github.com/osamaadam/manzoma#readme",
   "devDependencies": {
     "prettier": "^2.5.1"
   },

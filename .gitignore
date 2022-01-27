@@ -3,3 +3,4 @@ res.json
 .env
 client/build/
 server/dist/
+*.db
