@@ -36,6 +36,10 @@ export const userSlice = createSlice({
         status: "cleared",
       };
     },
+    selectToken: (state, action: { payload: string }) => {
+      if (action.payload !== state.details.data?.token)
+        state.details.data!.token = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -78,7 +82,7 @@ export const userSlice = createSlice({
   },
 });
 
-export const { logout } = userSlice.actions;
+export const { logout, selectToken } = userSlice.actions;
 export { login };
 
 export default userSlice.reducer;

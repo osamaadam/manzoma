@@ -26,7 +26,8 @@ export const apolloClient = new ApolloClient({
 });
 
 store.subscribe(() => {
-  localStorage.setItem("reduxState", JSON.stringify(store.getState()));
+  const curState = store.getState();
+  localStorage.setItem("reduxState", JSON.stringify(curState));
 });
 
 ReactDOM.render(

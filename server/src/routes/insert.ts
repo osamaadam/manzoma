@@ -1,9 +1,10 @@
 import { Router } from "express";
+import { verifyToken } from "../middleware/verifyToken";
 import { insertSoldier } from "../helpers/insertSoldier";
 
 const router = Router();
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
   let {
     soldier_name,
     rel_address,

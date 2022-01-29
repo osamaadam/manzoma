@@ -46,10 +46,16 @@ const NewComersForm = () => {
   const [curPrefix, setCurPrefix] = React.useState<number>();
   const [curMrhla, setCurMrhla] = React.useState<string>();
 
+  const [formDataQueryFailed, setFormDataQueryFailed] = React.useState(false);
+
   const fetchServerTime = async () => {
-    const { data } = await axios.get<string>("/time");
-    const momentObj = moment(data);
-    setServerTime(momentObj);
+    try {
+      const { data } = await axios.get<string>("/time");
+      const momentObj = moment(data);
+      setServerTime(momentObj);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const fetchMajors = async (moahelId: number | string) => {
@@ -65,6 +71,7 @@ const NewComersForm = () => {
   const fetchFormData = useCallback(async () => {
     try {
       const { data } = await axios.get<BasicFormData>("/form-data");
+      setFormDataQueryFailed(false);
       setGovs(data.govs);
       setBloodTypes(data.bloodTypes);
       setHealthOpts(data.health);
@@ -75,8 +82,10 @@ const NewComersForm = () => {
       setJobOpts(data.mehna);
       setIsLoading(false);
     } catch (err) {
-      console.error(err);
-      setTimeout(fetchFormData, 500);
+      if (axios.isAxiosError(err)) {
+        setFormDataQueryFailed(true);
+        message.error(err.message);
+      } else console.error(err);
     }
   }, []);
 
@@ -84,6 +93,17 @@ const NewComersForm = () => {
     fetchServerTime();
     fetchFormData();
   }, [fetchFormData]);
+
+  React.useEffect(() => {
+    let timeoutRef: NodeJS.Timeout;
+    if (formDataQueryFailed) {
+      timeoutRef = setTimeout(fetchFormData, 500);
+    }
+
+    return () => {
+      clearTimeout(timeoutRef);
+    };
+  }, [fetchFormData, formDataQueryFailed]);
 
   const deduceMoahel = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const militaryNumber = e.currentTarget.value.toString();

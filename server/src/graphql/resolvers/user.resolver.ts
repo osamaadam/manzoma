@@ -72,7 +72,7 @@ export class CustomUserResolver {
         username: dbUser.username,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "2h" }
+      { expiresIn: "15m" }
     );
 
     return {

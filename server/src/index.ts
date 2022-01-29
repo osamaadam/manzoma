@@ -1,4 +1,3 @@
-import { User } from "@generated/type-graphql";
 import { PrismaClient } from "@prisma/client";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { ApolloServer } from "apollo-server-express";
@@ -8,6 +7,7 @@ import jwt from "jsonwebtoken";
 import { resolve } from "path";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
+import { refreshToken } from "./middleware/refreshToken";
 import formDataRouter from "./routes/formData";
 import rasdRouter from "./routes/gendoc";
 import getRouter from "./routes/getSoldier";
@@ -18,7 +18,7 @@ import timeRouter from "./routes/time";
 
 export interface Context {
   prisma: PrismaClient;
-  user?: Partial<User>;
+  user?: DecodedToken;
   isAuthenticated: boolean;
 }
 
@@ -36,12 +36,12 @@ const main = async () => {
     schema,
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground({})],
     context: ({ req }): Context => {
-      let user: Partial<User> = undefined;
+      let user: DecodedToken;
       let isAuthenticated = false;
       try {
         const token = req.headers.authorization?.split(" ")[1];
         if (token) {
-          user = jwt.verify(token, process.env.JWT_SECRET) as Partial<User>;
+          user = jwt.verify(token, process.env.JWT_SECRET) as DecodedToken;
           isAuthenticated = true;
         }
       } catch (err) {
@@ -60,6 +60,7 @@ const main = async () => {
     })
   );
   app.use(express.json());
+  app.use(refreshToken);
 
   await apolloServer.start();
   apolloServer.applyMiddleware({ app });
