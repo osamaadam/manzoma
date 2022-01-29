@@ -12,7 +12,7 @@ generator typegraphql {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./sqlite.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -20,4 +20,78 @@ model User {
   username String @unique
   /// @TypeGraphQL.omit(output: true)
   password String
+}
+
+model Tagneed {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  Gov  Gov[]
+}
+
+model Gov {
+  id        Int      @id
+  name      String
+  tagneedId Int
+  tagneed   Tagneed  @relation(fields: [tagneedId], references: [id])
+  Center    Center[]
+}
+
+model Qualifaction {
+  id      Int       @id
+  name    String
+  Soldier Soldier[]
+}
+
+model Religion {
+  id      Int       @id
+  name    String
+  Soldier Soldier[]
+}
+
+model Center {
+  id      Int       @id
+  name    String
+  govId   Int
+  gov     Gov       @relation(fields: [govId], references: [id])
+  Soldier Soldier[]
+}
+
+model TagneedFactor {
+  id      Int       @id
+  name    String
+  Soldier Soldier[]
+}
+
+model Sarya {
+  id     Int      @id @default(autoincrement())
+  name   String   @unique
+  Fasela Fasela[]
+}
+
+model Fasela {
+  id      Int       @id @default(autoincrement())
+  name    String
+  saryaId Int
+  sarya   Sarya     @relation(fields: [saryaId], references: [id])
+  Soldier Soldier[]
+}
+
+model Soldier {
+  name            String
+  militaryNo      Int           @id @unique
+  nationalNo      Int           @unique
+  seglNo          Int
+  marhla          Int
+  qualificationId Int
+  qualification   Qualifaction  @relation(fields: [qualificationId], references: [id])
+  religionId      Int
+  religion        Religion      @relation(fields: [religionId], references: [id])
+  centerId        Int
+  center          Center        @relation(fields: [centerId], references: [id])
+  tagneedFactorId Int
+  tagneedFactor   TagneedFactor @relation(fields: [tagneedFactorId], references: [id])
+  faselaId        Int
+  fasela          Fasela        @relation(fields: [faselaId], references: [id])
+
+  @@unique([seglNo, marhla])
 }
