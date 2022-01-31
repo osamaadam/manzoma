@@ -1,10 +1,4 @@
-import {
-  Fasela,
-  PrismaClient,
-  Qualifaction,
-  Religion,
-  Soldier,
-} from "@prisma/client";
+import { PrismaClient, Qualifaction, Religion, Soldier } from "@prisma/client";
 import { query } from "../src/helpers/query";
 import { removeArabicDialicts } from "../src/helpers/removeArabicDialicts";
 
@@ -68,6 +62,7 @@ const seed = async () => {
       mantek_tagneed as tagneed
     from governorate
     where gov_name is not null
+      and mantek_tagneed is not null
   `)
   ).map((gov) => ({
     ...gov,
@@ -81,6 +76,13 @@ const seed = async () => {
   ];
 
   try {
+    await prisma.tagneed.create({
+      data: {
+        id: 0,
+        name: "غير مبين",
+      },
+    });
+
     const tagneedPromises = tagneeds.map(
       async (tag) =>
         await prisma.tagneed.create({
@@ -92,18 +94,35 @@ const seed = async () => {
     const tags = await Promise.all(tagneedPromises);
     console.log("seeded tagneed table");
 
-    const govPromises = govs.map(
-      async (gov) =>
-        await prisma.gov.create({
-          data: {
-            id: gov.id,
-            name: gov.name,
-            tagneedId: tags.find((tag) => tag.name === gov.tagneed).id,
+    await prisma.gov.create({
+      data: {
+        id: 0,
+        name: "غير مبين",
+        tagneed: {
+          connect: {
+            id: 0,
           },
-        })
-    );
+        },
+      },
+    });
 
-    await Promise.all(govPromises);
+    for (const gov of govs) {
+      await prisma.gov.create({
+        data: {
+          id: gov.id,
+          name: gov.name,
+          tagneed: {
+            connect: {
+              id: tags.find(
+                (tag) =>
+                  removeArabicDialicts(tag.name) ===
+                  removeArabicDialicts(gov.tagneed)
+              ).id,
+            },
+          },
+        },
+      });
+    }
     console.log("seeded gov table");
   } catch (err) {}
 
@@ -129,18 +148,19 @@ const seed = async () => {
       name: removeArabicDialicts(center.name),
     }));
 
-    const centerPromises = centers.map(
-      async (center) =>
-        await prisma.center.create({
-          data: {
-            id: center.id,
-            name: center.name,
-            govId: center.govid,
+    for (const center of centers) {
+      await prisma.center.create({
+        data: {
+          id: center.id,
+          name: center.name,
+          gov: {
+            connect: {
+              id: center.govid,
+            },
           },
-        })
-    );
-
-    await Promise.all(centerPromises);
+        },
+      });
+    }
     console.log("seeded center table");
   } catch (err) {}
 
@@ -158,17 +178,15 @@ const seed = async () => {
       name: removeArabicDialicts(factor.name),
     }));
 
-    const factorPromises = tagneedFactors.map(
-      async (factor) =>
-        await prisma.tagneedFactor.create({
-          data: {
-            id: factor.id,
-            name: factor.name,
-          },
-        })
-    );
-
-    await Promise.all(factorPromises);
+    for (const factor of tagneedFactors) {
+      await prisma.tagneedFactor.create({
+        data: {
+          id: factor.id,
+          name: factor.name,
+        },
+      });
+    }
+    console.log("seeded tagneedFactor table");
   } catch (err) {}
 
   try {
@@ -215,15 +233,309 @@ const seed = async () => {
       faselaId: 1,
     }));
 
-    const promises = soldiers.map(
-      async (sol) =>
-        await prisma.soldier.create({
-          data: sol,
-        })
-    );
+    for (const sol of soldiers) {
+      await prisma.soldier.create({
+        data: {
+          militaryNo: sol.militaryNo,
+          nationalNo: sol.nationalNo,
+          seglNo: sol.seglNo,
+          marhla: sol.marhla,
+          qualification: {
+            connect: {
+              id: sol.qualificationId,
+            },
+          },
+          religion: {
+            connect: {
+              id: sol.religionId,
+            },
+          },
+          center: {
+            connect: {
+              id: sol.centerId,
+            },
+          },
+          tagneedFactor: {
+            connect: {
+              id: sol.tagneedFactorId,
+            },
+          },
+          name: sol.name,
+          fasela: {
+            connect: {
+              id: 1,
+            },
+          },
+        },
+      });
+    }
 
-    await Promise.all(promises);
-    console.log("seeded soldiers");
+    console.log("seeded soldier table");
+  } catch (err) {}
+
+  try {
+    const militaryEntities = (
+      await query<
+        {
+          id: number;
+          name: string;
+          centerId: number;
+        }[]
+      >(`
+      select
+        geha_code as id,
+        geha_name as name,
+        markaz_code as centerId
+      from geha_code
+        where geha_code is not null
+          and markaz_code <= 600
+    `)
+    ).map((entity) => ({
+      ...entity,
+      id: +entity.id,
+      centerId: !isNaN(+entity.centerId) ? +entity.centerId : 0,
+      name: removeArabicDialicts(entity.name),
+    }));
+
+    for (const entity of militaryEntities) {
+      await prisma.militaryEntity.create({
+        data: {
+          id: +entity.id,
+          name: entity.name,
+          center: {
+            connect: { id: entity.centerId },
+          },
+        },
+      });
+    }
+
+    console.log("seeded entity table");
+  } catch (err) {}
+
+  try {
+    const weapons = (
+      await query<{ id: number; name: string }[]>(`
+      select
+        selah_code as id,
+        selah as name
+      from selah
+    `)
+    ).map((weapon) => ({
+      id: weapon.id,
+      name: removeArabicDialicts(weapon.name),
+    }));
+
+    await prisma.weapon.create({
+      data: {
+        id: 0,
+        name: "غير مبين",
+      },
+    });
+
+    for (const weapon of weapons) {
+      await prisma.weapon.create({
+        data: {
+          id: weapon.id,
+          name: weapon.name,
+        },
+      });
+    }
+    console.log("seeded weapon table");
+  } catch (err) {}
+
+  try {
+    const etgahat = (
+      await query<{ id: number; name: string }[]>(`
+      select
+        cod_tmrkz as id,
+        nam_tmrkz as name
+      from tmrkz_c
+    `)
+    ).map((etgah) => ({
+      id: +etgah.id,
+      name: removeArabicDialicts(etgah.name),
+    }));
+
+    for (const etgah of etgahat) {
+      await prisma.etgah.create({
+        data: {
+          id: etgah.id,
+          name: etgah.name,
+        },
+      });
+    }
+    console.log("seeded etgah table");
+  } catch (err) {}
+
+  try {
+    const units = (
+      await query<
+        {
+          id: number;
+          name: string;
+          parentId: number;
+          entityId: number;
+          weaponId: number;
+          etgahId: number;
+        }[]
+      >(`
+      select
+        unit_c as id,
+        unit_name as name,
+        pernt_c as parentId,
+        geha_code as entityId,
+        selah_c as weaponId,
+        tmrz_cod as etgahId
+      from units
+      order by unit_c asc
+    `)
+    ).map((unit) => ({
+      ...unit,
+      id: +unit.id,
+      name: removeArabicDialicts(unit.name),
+      parentId: !isNaN(+unit.parentId) ? +unit.parentId : 0,
+      entityId: !isNaN(+unit.entityId) ? +unit.entityId : 0,
+      weaponId: !isNaN(+unit.weaponId) ? +unit.weaponId : 0,
+      etgahId: !isNaN(+unit.etgahId) ? +unit.etgahId : 0,
+    }));
+
+    for (const unit of units) {
+      await prisma.unit.upsert({
+        where: {
+          id: unit.id,
+        },
+        create: {
+          id: unit.id,
+          name: unit.name,
+          weapon: {
+            connect: {
+              id: unit.weaponId,
+            },
+          },
+          etgah: {
+            connect: {
+              id: unit.etgahId,
+            },
+          },
+          militaryEntity: {
+            connectOrCreate: {
+              create: {
+                id: unit.entityId,
+                name: "غير مبين",
+                center: {
+                  connect: {
+                    id: 0,
+                  },
+                },
+              },
+              where: {
+                id: unit.entityId,
+              },
+            },
+          },
+          parent: {
+            connectOrCreate: {
+              create: {
+                id: unit.parentId,
+                name: "غير مبين",
+                weapon: {
+                  connect: {
+                    id: unit.weaponId,
+                  },
+                },
+                etgah: {
+                  connect: {
+                    id: unit.etgahId,
+                  },
+                },
+                militaryEntity: {
+                  connect: {
+                    id: unit.entityId,
+                  },
+                },
+              },
+              where: {
+                id: unit.parentId,
+              },
+            },
+          },
+        },
+        update: {
+          name: unit.name,
+          weapon: {
+            connect: {
+              id: unit.weaponId,
+            },
+          },
+          etgah: {
+            connect: {
+              id: unit.etgahId,
+            },
+          },
+          parent: {
+            connectOrCreate: {
+              create: {
+                id: unit.parentId,
+                name: "غير مبين",
+                weapon: {
+                  connect: {
+                    id: unit.weaponId,
+                  },
+                },
+                etgah: {
+                  connect: {
+                    id: unit.etgahId,
+                  },
+                },
+                militaryEntity: {
+                  connect: {
+                    id: unit.entityId,
+                  },
+                },
+              },
+              where: {
+                id: unit.parentId,
+              },
+            },
+          },
+        },
+      });
+      // await prisma.unit.create({
+      //   data: {
+      //     id: unit.id,
+      //     name: unit.name,
+      //     weapon: {
+      //       connect: {
+      //         id: unit.weaponId,
+      //       },
+      //     },
+      //     etgah: {
+      //       connect: {
+      //         id: unit.etgahId,
+      //       },
+      //     },
+      //     parentId: unit.parentId,
+      //     militaryEntity: {
+      //       connectOrCreate: {
+      //         create: {
+      //           id: unit.entityId,
+      //           name: "غير مبين",
+      //           center: {
+      //             connect: {
+      //               id: 0,
+      //             },
+      //           },
+      //         },
+      //         where: {
+      //           id: unit.entityId,
+      //         },
+      //       },
+      //     },
+      //   },
+      // });
+    }
+
+    console.log("seeded unit table");
   } catch (err) {
     console.error(err);
   }

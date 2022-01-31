@@ -49,11 +49,12 @@ model Religion {
 }
 
 model Center {
-  id      Int       @id
-  name    String
-  govId   Int
-  gov     Gov       @relation(fields: [govId], references: [id])
-  Soldier Soldier[]
+  id             Int              @id
+  name           String
+  govId          Int
+  gov            Gov              @relation(fields: [govId], references: [id])
+  Soldier        Soldier[]
+  MilitaryEntity MilitaryEntity[]
 }
 
 model TagneedFactor {
@@ -93,5 +94,55 @@ model Soldier {
   faselaId        Int
   fasela          Fasela        @relation(fields: [faselaId], references: [id])
 
+  status Status[]
   @@unique([seglNo, marhla])
+}
+
+model Status {
+  id           Int        @id @default(autoincrement())
+  name         String     @unique
+  militaryNo   Int        @unique
+  soldier      Soldier    @relation(fields: [militaryNo], references: [militaryNo])
+  statusTypeId Int
+  statusType   StatusType @relation(fields: [statusTypeId], references: [id])
+}
+
+model StatusType {
+  id     Int      @id @default(autoincrement())
+  name   String   @unique
+  Status Status[]
+}
+
+model MilitaryEntity {
+  id       Int     @id
+  name     String
+  centerId Int?
+  center   Center? @relation(fields: [centerId], references: [id])
+  Unit     Unit[]
+}
+
+model Weapon {
+  id   Int    @id
+  name String
+  Unit Unit[]
+}
+
+model Etgah {
+  id   Int    @id
+  name String @unique
+  Unit Unit[]
+}
+
+model Unit {
+  id               Int             @id
+  name             String
+  parentId         Int?
+  parent           Unit?           @relation("UnitToUnit", fields: [parentId], references: [id])
+  militaryEntityId Int?
+  militaryEntity   MilitaryEntity? @relation(fields: [militaryEntityId], references: [id])
+  weaponId         Int?
+  weapon           Weapon?         @relation(fields: [weaponId], references: [id])
+  etgahId          Int
+  etgah            Etgah           @relation(fields: [etgahId], references: [id])
+  Unit             Unit[]          @relation("UnitToUnit")
 }

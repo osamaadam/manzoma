@@ -12,6 +12,7 @@ export const removeArabicDialicts = (text: string) => {
 
   return (
     text
+      .replace(/\s+/g, " ")
       .replace(/ي\s+/g, "ى ")
       .replace(/ي$/g, "ى")
       // eslint-disable-next-line
