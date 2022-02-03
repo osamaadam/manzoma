@@ -36,7 +36,7 @@ model Gov {
   Center    Center[]
 }
 
-model Qualifaction {
+model Qualification {
   id      Int       @id
   name    String
   Soldier Soldier[]
@@ -79,32 +79,44 @@ model Fasela {
 
 model Soldier {
   name            String
-  militaryNo      Int           @id @unique
-  nationalNo      Int           @unique
+  militaryNo      Int             @id @unique
+  nationalNo      Int             @unique
   seglNo          Int
   marhla          Int
   qualificationId Int
-  qualification   Qualifaction  @relation(fields: [qualificationId], references: [id])
+  qualification   Qualification   @relation(fields: [qualificationId], references: [id])
   religionId      Int
-  religion        Religion      @relation(fields: [religionId], references: [id])
+  religion        Religion        @relation(fields: [religionId], references: [id])
   centerId        Int
-  center          Center        @relation(fields: [centerId], references: [id])
+  center          Center          @relation(fields: [centerId], references: [id])
   tagneedFactorId Int
-  tagneedFactor   TagneedFactor @relation(fields: [tagneedFactorId], references: [id])
-  faselaId        Int
-  fasela          Fasela        @relation(fields: [faselaId], references: [id])
+  tagneedFactor   TagneedFactor   @relation(fields: [tagneedFactorId], references: [id])
+  faselaId        Int?
+  fasela          Fasela?         @relation(fields: [faselaId], references: [id])
+  statusId        Int?
+  status          Status?         @relation(fields: [statusId], references: [id])
+  unitId          Int?
+  unit            Unit?           @relation(fields: [unitId], references: [id])
+  rankId          Int?
+  rank            Rank?           @relation(fields: [rankId], references: [id])
+  address         String?
+  TawzeaHistory   TawzeaHistory[]
 
-  status Status[]
   @@unique([seglNo, marhla])
+}
+
+model Rank {
+  id      Int       @id
+  name    String    @unique
+  Soldier Soldier[]
 }
 
 model Status {
   id           Int        @id @default(autoincrement())
   name         String     @unique
-  militaryNo   Int        @unique
-  soldier      Soldier    @relation(fields: [militaryNo], references: [militaryNo])
   statusTypeId Int
   statusType   StatusType @relation(fields: [statusTypeId], references: [id])
+  Soldier      Soldier[]
 }
 
 model StatusType {
@@ -145,4 +157,15 @@ model Unit {
   etgahId          Int
   etgah            Etgah           @relation(fields: [etgahId], references: [id])
   Unit             Unit[]          @relation("UnitToUnit")
+  Soldier          Soldier[]
+  TawzeaHistory    TawzeaHistory[]
+}
+
+model TawzeaHistory {
+  id         Int      @id @default(autoincrement())
+  militaryNo Int
+  soldier    Soldier  @relation(fields: [militaryNo], references: [militaryNo])
+  unitId     Int
+  unit       Unit     @relation(fields: [unitId], references: [id])
+  created    DateTime @default(now())
 }

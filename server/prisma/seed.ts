@@ -1,6 +1,7 @@
-import { PrismaClient, Qualifaction, Religion, Soldier } from "@prisma/client";
+import { PrismaClient, Qualification, Religion, Soldier } from "@prisma/client";
 import { query } from "../src/helpers/query";
-import { removeArabicDialicts } from "../src/helpers/removeArabicDialicts";
+import { normalizeArabic } from "../src/helpers/normalizeArabic";
+import seedData from "./seed.data";
 
 const seed = async () => {
   const prisma = new PrismaClient();
@@ -14,7 +15,7 @@ const seed = async () => {
   `)
   ).map((religion) => ({
     ...religion,
-    name: removeArabicDialicts(religion.name),
+    name: normalizeArabic(religion.name),
   }));
 
   const religionPromises = religions.map(
@@ -29,8 +30,56 @@ const seed = async () => {
     console.log("seeded religion table");
   } catch (err) {}
 
+  try {
+    const ranks = (
+      await query<{ id: number; name: string }[]>(`
+      select 
+        deg_no as id,
+        deg_name as name
+      from degree
+    `)
+    ).map((rank) => ({
+      id: +rank.id,
+      name: normalizeArabic(rank.name),
+    }));
+    for (const rank of ranks) {
+      await prisma.rank.create({
+        data: {
+          id: rank.id,
+          name: rank.name,
+        },
+      });
+    }
+    console.log("seeded rank");
+  } catch (err) {}
+
+  try {
+    for (const statusType of seedData.StatusType) {
+      await prisma.statusType.create({
+        data: {
+          id: statusType.id,
+          name: statusType.name,
+        },
+      });
+    }
+    console.log("seeded statustype");
+  } catch (err) {}
+
+  try {
+    for (const status of seedData.Status) {
+      await prisma.status.create({
+        data: {
+          id: status.id,
+          name: status.name,
+          statusTypeId: status.statusTypeId,
+        },
+      });
+    }
+    console.log("seeded status");
+  } catch (err) {}
+
   const qualifications = (
-    await query<Qualifaction[]>(`
+    await query<Qualification[]>(`
       select
         moahel_code as id,
         moahel_name as name
@@ -39,12 +88,12 @@ const seed = async () => {
   ).map((qual) => ({
     ...qual,
     id: +qual.id,
-    name: removeArabicDialicts(qual.name),
+    name: normalizeArabic(qual.name),
   }));
 
   const qualPromises = qualifications.map(
     async (qual) =>
-      await prisma.qualifaction.create({
+      await prisma.qualification.create({
         data: qual,
       })
   );
@@ -67,8 +116,8 @@ const seed = async () => {
   ).map((gov) => ({
     ...gov,
     id: +gov.id,
-    name: removeArabicDialicts(gov.name),
-    tagneed: gov.tagneed && removeArabicDialicts(gov.tagneed),
+    name: normalizeArabic(gov.name),
+    tagneed: gov.tagneed && normalizeArabic(gov.tagneed),
   }));
 
   const tagneeds = [
@@ -115,8 +164,7 @@ const seed = async () => {
             connect: {
               id: tags.find(
                 (tag) =>
-                  removeArabicDialicts(tag.name) ===
-                  removeArabicDialicts(gov.tagneed)
+                  normalizeArabic(tag.name) === normalizeArabic(gov.tagneed)
               ).id,
             },
           },
@@ -145,7 +193,7 @@ const seed = async () => {
       ...center,
       id: +center.id,
       govid: +center.govid,
-      name: removeArabicDialicts(center.name),
+      name: normalizeArabic(center.name),
     }));
 
     for (const center of centers) {
@@ -175,7 +223,7 @@ const seed = async () => {
     ).map((factor) => ({
       ...factor,
       id: +factor.id,
-      name: removeArabicDialicts(factor.name),
+      name: normalizeArabic(factor.name),
     }));
 
     for (const factor of tagneedFactors) {
@@ -216,7 +264,8 @@ const seed = async () => {
         religion_code as religionId,
         center_code as centerId,
         tagneed_factor as tagneedFactorId,
-        soldier_name as name
+        soldier_name as name,
+        current_degree as rankId
       from src_soldiers
     `)
     ).map((soldier) => ({
@@ -229,8 +278,9 @@ const seed = async () => {
       religionId: +soldier.religionId,
       centerId: +soldier.centerId,
       tagneedFactorId: +soldier.tagneedFactorId,
-      name: removeArabicDialicts(soldier.name),
-      faselaId: 1,
+      name: normalizeArabic(soldier.name),
+      rankId: +soldier.rankId,
+      statusId: 0,
     }));
 
     for (const sol of soldiers) {
@@ -261,9 +311,9 @@ const seed = async () => {
             },
           },
           name: sol.name,
-          fasela: {
+          rank: {
             connect: {
-              id: 1,
+              id: sol.rankId,
             },
           },
         },
@@ -271,7 +321,9 @@ const seed = async () => {
     }
 
     console.log("seeded soldier table");
-  } catch (err) {}
+  } catch (err) {
+    console.error(err);
+  }
 
   try {
     const militaryEntities = (
@@ -288,13 +340,15 @@ const seed = async () => {
         markaz_code as centerId
       from geha_code
         where geha_code is not null
-          and markaz_code <= 600
     `)
     ).map((entity) => ({
       ...entity,
       id: +entity.id,
-      centerId: !isNaN(+entity.centerId) ? +entity.centerId : 0,
-      name: removeArabicDialicts(entity.name),
+      centerId:
+        !isNaN(+entity.centerId) && +entity.centerId <= 522
+          ? +entity.centerId
+          : 0,
+      name: normalizeArabic(entity.name),
     }));
 
     for (const entity of militaryEntities) {
@@ -322,7 +376,7 @@ const seed = async () => {
     `)
     ).map((weapon) => ({
       id: weapon.id,
-      name: removeArabicDialicts(weapon.name),
+      name: normalizeArabic(weapon.name),
     }));
 
     await prisma.weapon.create({
@@ -353,7 +407,7 @@ const seed = async () => {
     `)
     ).map((etgah) => ({
       id: +etgah.id,
-      name: removeArabicDialicts(etgah.name),
+      name: normalizeArabic(etgah.name),
     }));
 
     for (const etgah of etgahat) {
@@ -392,7 +446,7 @@ const seed = async () => {
     ).map((unit) => ({
       ...unit,
       id: +unit.id,
-      name: removeArabicDialicts(unit.name),
+      name: normalizeArabic(unit.name),
       parentId: !isNaN(+unit.parentId) ? +unit.parentId : 0,
       entityId: !isNaN(+unit.entityId) ? +unit.entityId : 0,
       weaponId: !isNaN(+unit.weaponId) ? +unit.weaponId : 0,
@@ -449,8 +503,19 @@ const seed = async () => {
                   },
                 },
                 militaryEntity: {
-                  connect: {
-                    id: unit.entityId,
+                  connectOrCreate: {
+                    create: {
+                      id: unit.entityId,
+                      name: "غير مبين",
+                      center: {
+                        connect: {
+                          id: 0,
+                        },
+                      },
+                    },
+                    where: {
+                      id: unit.entityId,
+                    },
                   },
                 },
               },
@@ -500,45 +565,9 @@ const seed = async () => {
           },
         },
       });
-      // await prisma.unit.create({
-      //   data: {
-      //     id: unit.id,
-      //     name: unit.name,
-      //     weapon: {
-      //       connect: {
-      //         id: unit.weaponId,
-      //       },
-      //     },
-      //     etgah: {
-      //       connect: {
-      //         id: unit.etgahId,
-      //       },
-      //     },
-      //     parentId: unit.parentId,
-      //     militaryEntity: {
-      //       connectOrCreate: {
-      //         create: {
-      //           id: unit.entityId,
-      //           name: "غير مبين",
-      //           center: {
-      //             connect: {
-      //               id: 0,
-      //             },
-      //           },
-      //         },
-      //         where: {
-      //           id: unit.entityId,
-      //         },
-      //       },
-      //     },
-      //   },
-      // });
     }
-
     console.log("seeded unit table");
-  } catch (err) {
-    console.error(err);
-  }
+  } catch (err) {}
 };
 
 seed()

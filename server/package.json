@@ -29,6 +29,7 @@
     "graphql-scalars": "^1.14.1",
     "jsonwebtoken": "^8.5.1",
     "luxon": "^2.2.0",
+    "manzoma": "file:..",
     "node-adodb": "^5.0.3",
     "reflect-metadata": "^0.1.13",
     "tslib": "^2.3.1",
