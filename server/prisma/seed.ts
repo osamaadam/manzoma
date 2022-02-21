@@ -32,7 +32,7 @@ const seed = async () => {
   try {
     const ranks = (
       await query<{ id: number; name: string }[]>(`
-      select 
+      select
         deg_no as id,
         deg_name as name
       from degree
@@ -52,21 +52,6 @@ const seed = async () => {
       )
     );
     console.log("seeded rank");
-  } catch (err) {}
-
-  try {
-    await prisma.$transaction(
-      seedData.StatusType.map((statusType) =>
-        prisma.statusType.create({
-          data: {
-            id: statusType.id,
-            name: statusType.name,
-          },
-        })
-      )
-    );
-
-    console.log("seeded statustype");
   } catch (err) {}
 
   try {
@@ -281,7 +266,8 @@ const seed = async () => {
         center_code as centerId,
         tagneed_factor as tagneedFactorId,
         soldier_name as name,
-        current_degree as rankId
+        current_degree as rankId,
+        address
       from src_soldiers
     `)
     ).map((soldier) => ({
@@ -307,6 +293,7 @@ const seed = async () => {
             nationalNo: sol.nationalNo,
             seglNo: sol.seglNo,
             marhla: sol.marhla,
+            address: sol.address,
             qualification: {
               connect: {
                 id: sol.qualificationId,

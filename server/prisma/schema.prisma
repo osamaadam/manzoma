@@ -7,7 +7,7 @@ generator client {
 
 generator typegraphql {
   provider = "typegraphql-prisma"
-  emitOnly = "models,inputs"
+  // emitOnly = "models,inputs"
 }
 
 datasource db {
@@ -79,8 +79,8 @@ model Fasela {
 
 model Soldier {
   name            String
-  militaryNo      Int             @id @unique
-  nationalNo      Int             @unique
+  militaryNo      String          @id @unique
+  nationalNo      String          @unique
   seglNo          Int
   marhla          Int
   qualificationId Int
@@ -95,12 +95,13 @@ model Soldier {
   fasela          Fasela?         @relation(fields: [faselaId], references: [id])
   statusId        Int?
   status          Status?         @relation(fields: [statusId], references: [id])
-  unitId          Int?
-  unit            Unit?           @relation(fields: [unitId], references: [id])
   rankId          Int?
   rank            Rank?           @relation(fields: [rankId], references: [id])
   address         String?
   TawzeaHistory   TawzeaHistory[]
+  curTawzeaId     Int?
+  curTawzea       TawzeaHistory?  @relation("CurrentTawzea", fields: [curTawzeaId], references: [id])
+  Tarheal         Tarheal?
 
   @@unique([seglNo, marhla])
 }
@@ -112,17 +113,9 @@ model Rank {
 }
 
 model Status {
-  id           Int        @id @default(autoincrement())
-  name         String     @unique
-  statusTypeId Int
-  statusType   StatusType @relation(fields: [statusTypeId], references: [id])
-  Soldier      Soldier[]
-}
-
-model StatusType {
-  id     Int      @id @default(autoincrement())
-  name   String   @unique
-  Status Status[]
+  id      Int       @id @default(autoincrement())
+  name    String    @unique
+  Soldier Soldier[]
 }
 
 model MilitaryEntity {
@@ -157,15 +150,35 @@ model Unit {
   etgahId          Int
   etgah            Etgah           @relation(fields: [etgahId], references: [id])
   Unit             Unit[]          @relation("UnitToUnit")
-  Soldier          Soldier[]
+  Tarheal          Tarheal[]
   TawzeaHistory    TawzeaHistory[]
 }
 
 model TawzeaHistory {
+  id               Int            @id @default(autoincrement())
+  militaryNo       String
+  soldier          Soldier        @relation(fields: [militaryNo], references: [militaryNo])
+  unitId           Int
+  unit             Unit           @relation(fields: [unitId], references: [id])
+  pageNo           Int
+  receivedTawzeaId Int
+  receivedTawzea   ReceivedTawzea @relation(fields: [receivedTawzeaId], references: [id])
+  Soldier          Soldier[]      @relation("CurrentTawzea")
+}
+
+model ReceivedTawzea {
+  id            Int             @id @default(autoincrement())
+  displayName   String
+  numOfPages    Int
+  DateReceived  DateTime
+  TawzeaHistory TawzeaHistory[]
+}
+
+model Tarheal {
   id         Int      @id @default(autoincrement())
-  militaryNo Int
+  militaryNo String   @unique
   soldier    Soldier  @relation(fields: [militaryNo], references: [militaryNo])
   unitId     Int
   unit       Unit     @relation(fields: [unitId], references: [id])
-  created    DateTime @default(now())
+  createdAt  DateTime @default(now())
 }

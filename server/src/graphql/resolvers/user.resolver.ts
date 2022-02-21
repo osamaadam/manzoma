@@ -1,6 +1,7 @@
-import { User, UserCreateInput, UserWhereInput } from "@generated/type-graphql";
+import { User, UserCreateInput } from "@generated/type-graphql";
 import { UserInputError } from "apollo-server-express";
 import { compare, hash } from "bcrypt";
+import jwt from "jsonwebtoken";
 import {
   Arg,
   Ctx,
@@ -12,7 +13,6 @@ import {
   Resolver,
 } from "type-graphql";
 import { Context } from "../../index";
-import jwt from "jsonwebtoken";
 
 @ObjectType()
 class UserWithToken extends User {

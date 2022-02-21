@@ -30,7 +30,10 @@ const main = async () => {
     validate: false,
   });
 
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({
+    errorFormat: "pretty",
+    log: ["query", "warn", "error"],
+  });
 
   const apolloServer = new ApolloServer({
     schema,
