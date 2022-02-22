@@ -16,6 +16,7 @@ import RasdButton from "./components/RasdButton";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { logout, selectToken } from "./redux/slices/user.slice";
 import Login from "./routes/login";
+import Newcomers from "./routes/newcomers";
 
 const App = () => {
   const user = useAppSelector((state) => state.user);
@@ -69,6 +70,7 @@ const App = () => {
         <Route path="/newcomers/register" element={<NewComersForm />} />
         <Route path="/report/rasd" element={<RasdButton />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/newcomers" element={<Newcomers />} />
         <Route path="*" element={<Navigate to="/newcomers/register" />} />
       </Routes>
     </main>

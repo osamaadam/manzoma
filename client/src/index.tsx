@@ -8,7 +8,12 @@ import { Provider } from "react-redux";
 import App from "./App";
 import "./index.less";
 import store from "./redux/store";
-import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
+import {
+  ApolloClient,
+  ApolloProvider,
+  createHttpLink,
+  InMemoryCache,
+} from "@apollo/client";
 import { BrowserRouter } from "react-router-dom";
 
 export const URI =
@@ -33,9 +38,11 @@ store.subscribe(() => {
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <ConfigProvider locale={arEG} direction="rtl">
+      <ConfigProvider locale={arEG} direction="rtl" componentSize="middle">
         <BrowserRouter basename="/manzoma">
-          <App />
+          <ApolloProvider client={apolloClient}>
+            <App />
+          </ApolloProvider>
         </BrowserRouter>
       </ConfigProvider>
     </Provider>
