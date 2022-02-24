@@ -11,3 +11,26 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+.table {
+  td {
+    &:not(:last-child) {
+      border-left: solid 1px;
+    }
+    padding: 0.25rem;
+  }
+
+  th {
+    &:not(:last-child) {
+      border-left: solid 1px;
+    }
+    border-bottom: solid 1px;
+    padding: 0.25rem;
+  }
+
+  tr {
+    &:not(:last-child) {
+      border-bottom: solid 1px;
+    }
+  }
+}

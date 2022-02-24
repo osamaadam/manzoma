@@ -61,7 +61,6 @@ const seed = async () => {
           data: {
             id: status.id,
             name: status.name,
-            statusTypeId: status.statusTypeId,
           },
         })
       )
@@ -272,8 +271,8 @@ const seed = async () => {
     `)
     ).map((soldier) => ({
       ...soldier,
-      militaryNo: +soldier.militaryNo,
-      nationalNo: +soldier.nationalNo,
+      militaryNo: soldier.militaryNo,
+      nationalNo: soldier.nationalNo,
       seglNo: +soldier.seglNo,
       marhla: +soldier.marhla,
       qualificationId: +soldier.qualificationId,

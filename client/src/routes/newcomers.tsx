@@ -1,20 +1,23 @@
-import { useLazyQuery, useQuery } from "@apollo/client";
-import { Input, Select } from "antd";
-import Table, { ColumnType } from "antd/lib/table";
-import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@apollo/client";
+import { Input } from "antd";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Column,
+  useAsyncDebounce,
+  useBlockLayout,
+  useGlobalFilter,
+  useSortBy,
+  useTable,
+} from "react-table";
+import AutoSizer from "react-virtualized-auto-sizer";
+import { VariableSizeList } from "react-window";
 import { soldiersQuery } from "src/graphql/soldiersQuery";
 import { Soldier } from "type-graphql";
 
 const Newcomers = () => {
   const [soldiers, setSoldiers] = useState<Soldier[]>([]);
-  const [visibleSoldiers, setVisibleSoldiers] = useState<Soldier[]>([]);
-  const [searchCat, setSearchCat] = useState("name");
-
-  const [searchSoldiers, searchSoldiersResponse] =
-    useLazyQuery<{ soldiers: Soldier[] }>(soldiersQuery);
   const { data } = useQuery<{ soldiers: Soldier[] }>(soldiersQuery, {
     variables: {
-      take: 10,
       orderBy: {
         seglNo: "asc",
       },
@@ -28,104 +31,108 @@ const Newcomers = () => {
     }
   }, [data]);
 
-  useEffect(() => {
-    if (
-      searchSoldiersResponse.data?.soldiers &&
-      !searchSoldiersResponse.loading
-    ) {
-      setVisibleSoldiers(searchSoldiersResponse.data.soldiers);
-    } else {
-      setVisibleSoldiers(soldiers);
-    }
-  }, [searchSoldiersResponse.data, searchSoldiersResponse.loading, soldiers]);
+  const columns: Column<Soldier>[] = useMemo(
+    (): Column<Soldier>[] => [
+      {
+        Header: "رقم السجل",
+        accessor: "seglNo",
+      },
+      {
+        Header: "الاسم",
+        accessor: "name",
+      },
+      {
+        Header: "الرقم العسكري",
+        accessor: "militaryNo",
+      },
+      {
+        Header: "المحافظة",
+        accessor: (record) => record.center?.gov?.name,
+      },
+      {
+        Header: "القسم/المركز",
+        accessor: (record) => record.center?.name,
+      },
+    ],
+    []
+  );
 
-  const columns: ColumnType<Soldier>[] = [
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    // @ts-ignore
+    setGlobalFilter,
+  } = useTable(
     {
-      title: "رقم السجل",
-      dataIndex: "seglNo",
-      key: "seglNo",
-      sorter: (a, b) => a.seglNo - b.seglNo,
-      defaultSortOrder: "ascend",
-      align: "right",
-      render: (_, record) =>
-        record.seglNo.toLocaleString("ar-EG", { useGrouping: false }),
+      data: soldiers,
+      columns,
     },
-    {
-      title: "الاسم",
-      dataIndex: "name",
-      key: "name",
-      sorter: (a, b) => a.name.localeCompare(b.name),
-      align: "right",
+    useGlobalFilter,
+    useSortBy,
+    useBlockLayout
+  );
+
+  const onSearchChange = useAsyncDebounce((val) => setGlobalFilter(val), 300);
+
+  const RenderRow = useCallback(
+    ({ index }) => {
+      const row = rows[index];
+      prepareRow(row);
+      return (
+        <tr {...row.getRowProps()}>
+          {row.cells.map((cell) => (
+            <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+          ))}
+        </tr>
+      );
     },
-  ];
-
-  const Search = () => {
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const [searchVal, setSearchVal] = useState<string | number>("");
-
-    const handleSearch = (val: string) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (val.length) {
-        let searchCond = {};
-
-        switch (searchCat) {
-          case "name":
-            setSearchVal(val);
-            searchCond = {
-              name: {
-                contains: val,
-              },
-            };
-            break;
-          case "seglNo":
-            setSearchVal(+val);
-            searchCond = {
-              seglNo: {
-                equals: +val,
-              },
-            };
-            break;
-          default:
-            break;
-        }
-
-        timeoutRef.current = setTimeout(() => {
-          searchSoldiers({
-            variables: {
-              where: searchCond,
-            },
-          });
-        }, 200);
-      } else {
-        setVisibleSoldiers(soldiers);
-      }
-    };
-
-    return (
-      <Input.Search
-        autoFocus
-        placeholder="الاسم"
-        value={searchVal}
-        loading={searchSoldiersResponse.loading}
-        onChange={(e) => setSearchVal(e.currentTarget.value)}
-        onSearch={(val) => handleSearch(val)}
-      />
-    );
-  };
+    [prepareRow, rows]
+  );
 
   return (
     <>
-      <Select value={searchCat} onChange={(val) => setSearchCat(val)}>
-        <Select.Option value={"name"}>الاسم</Select.Option>
-        <Select.Option value={"seglNo"}>رقم السجل</Select.Option>
-      </Select>
-      <Search />
-      <Table
-        dataSource={visibleSoldiers}
-        columns={columns}
-        direction="rtl"
-        pagination={false}
+      <Input.Search
+        placeholder="بحث"
+        onChange={(e) => {
+          const val = e.target.value;
+          onSearchChange(val);
+        }}
       />
+      <table {...getTableProps()} className="table">
+        <thead>
+          {headerGroups.map((group) => (
+            <tr {...group.getHeaderGroupProps()}>
+              {group.headers.map((col) => (
+                // @ts-ignore
+                <th {...col.getHeaderProps(col.getSortByToggleProps())}>
+                  {col.render("Header")}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody {...getTableBodyProps()}>
+          <AutoSizer>
+            {({ height, width }) => {
+              console.log({ height, width });
+              return (
+                <VariableSizeList
+                  height={height + 100}
+                  itemCount={rows.length}
+                  itemSize={() => 35}
+                  direction="rtl"
+                  width={width}
+                >
+                  {RenderRow}
+                </VariableSizeList>
+              );
+            }}
+          </AutoSizer>
+        </tbody>
+      </table>
     </>
   );
 };
