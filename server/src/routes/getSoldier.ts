@@ -1,4 +1,5 @@
 import { Router } from "express";
+import logger from "../logger";
 import { query } from "../helpers/query";
 
 interface BasicRow {
@@ -71,7 +72,7 @@ router.get("/soldier", async (req, res) => {
     if (soldier?.length) res.json(soldier);
     else res.sendStatus(204);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     res.status(500).send(err);
   }
 });

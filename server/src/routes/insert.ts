@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { verifyToken } from "../middleware/verifyToken";
 import { insertSoldier } from "../helpers/insertSoldier";
+import logger from "../logger";
 
 const router = Router();
 
@@ -79,7 +80,7 @@ router.post("/", verifyToken, async (req, res) => {
 
     res.sendStatus(200);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     res.status(500).send(err);
   }
 });

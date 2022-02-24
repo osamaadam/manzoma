@@ -4,6 +4,7 @@ import { ApolloServer } from "apollo-server-express";
 import cors from "cors";
 import express from "express";
 import jwt from "jsonwebtoken";
+import logger from "./logger";
 import { resolve } from "path";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
@@ -35,6 +36,8 @@ const main = async () => {
     log: ["query", "warn", "error"],
   });
 
+  logger.info("connected to prisma client");
+
   const apolloServer = new ApolloServer({
     schema,
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground({})],
@@ -48,7 +51,7 @@ const main = async () => {
           isAuthenticated = true;
         }
       } catch (err) {
-        if (err.message !== "invalid token") console.error(err);
+        if (err.message !== "invalid token") logger.error(err);
       } finally {
         return { prisma, user, isAuthenticated };
       }
@@ -79,7 +82,7 @@ const main = async () => {
   app.use("/rasd", rasdRouter);
 
   app.listen(PORT, () => {
-    console.log(`listening on port ${PORT}`);
+    logger.info(`listening on port ${PORT}`);
   });
 };
 

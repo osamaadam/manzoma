@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import logger from "../logger";
 
 export const refreshToken = (
   req: Request,
@@ -14,7 +15,7 @@ export const refreshToken = (
     jwt.verify(reqToken, process.env.JWT_SECRET) as DecodedToken;
   } catch (err: any) {
     if (err.name === "TokenExpiredError") {
-      console.log("token expired, generating a new token");
+      logger.info("token expired, generating a new token");
       const { id, username } = jwt.decode(reqToken) as DecodedToken;
       const token = jwt.sign(
         {

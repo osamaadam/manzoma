@@ -1,4 +1,5 @@
 import { Router } from "express";
+import logger from "../logger";
 import { query } from "../helpers/query";
 
 const router = Router();
@@ -11,7 +12,7 @@ router.get("/major", async (req, res) => {
       const majors = await getMajor(+moahelId);
       res.json(majors);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       res.status(500).send(err);
     }
   }
@@ -25,7 +26,7 @@ router.get("/markaz", async (req, res) => {
       const marakez = await getMarkaz(+govId);
       res.json(marakez);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       res.status(500).send(err);
     }
   }
@@ -72,7 +73,7 @@ router.get("/", async (req, res) => {
       driversLicense,
     });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     res.status(500).send(err);
   }
 });
@@ -130,7 +131,7 @@ const getBloodType = async () => {
 const getMarkaz = async (govId: number) => {
   const queryString = `
     select markaz_code as id, mohafza_code as govId, markaz as name, gov_name as gov
-    from (markaz m 
+    from (markaz m
       left join governorate g on int(m.mohafza_code) = int(g.gov_no))
     where m.mohafza_code = ${govId}
   `;
