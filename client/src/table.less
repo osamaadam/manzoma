@@ -1,0 +1,45 @@
+table {
+  td {
+    &:not(:last-child) {
+      border-left: solid 1px;
+    }
+    padding: 0.25rem;
+  }
+
+  th {
+    &:not(:last-child) {
+      border-left: solid 1px;
+    }
+    border-bottom: solid 1px;
+    padding: 0.25rem;
+  }
+
+  tr {
+    &:not(:last-child) {
+      border-bottom: solid 1px;
+    }
+  }
+
+  tbody {
+    tr {
+      &:nth-child(even) {
+        background-color: var(--odd-tr);
+      }
+      &.mawkef-teby {
+        background-color: var(--mawkef-color);
+        color: white;
+      }
+
+      &.raft-teby {
+        background-color: var(--raft-color);
+        color: white;
+      }
+    }
+  }
+
+  thead {
+    tr {
+      background-color: var(--odd-tr);
+    }
+  }
+}

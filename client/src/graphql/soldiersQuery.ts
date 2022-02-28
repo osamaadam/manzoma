@@ -35,6 +35,7 @@ export const soldiersQuery = gql`
         }
       }
       status {
+        id
         name
       }
       predefinedEtgah {

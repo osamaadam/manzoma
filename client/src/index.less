@@ -1,4 +1,10 @@
-@import "~antd/dist/antd.less";
+@import "~antd/dist/antd.dark.css";
+
+:root {
+  --odd-tr: #9a9fa226;
+  --mawkef-color: #7878ff;
+  --raft-color: #d9363e;
+}
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -10,27 +16,4 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
-}
-
-.table {
-  td {
-    &:not(:last-child) {
-      border-left: solid 1px;
-    }
-    padding: 0.25rem;
-  }
-
-  th {
-    &:not(:last-child) {
-      border-left: solid 1px;
-    }
-    border-bottom: solid 1px;
-    padding: 0.25rem;
-  }
-
-  tr {
-    &:not(:last-child) {
-      border-bottom: solid 1px;
-    }
-  }
 }
