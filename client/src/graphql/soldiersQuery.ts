@@ -34,6 +34,12 @@ export const soldiersQuery = gql`
           name
         }
       }
+      status {
+        name
+      }
+      predefinedEtgah {
+        name
+      }
       address
     }
   }

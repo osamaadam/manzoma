@@ -78,30 +78,32 @@ model Fasela {
 }
 
 model Soldier {
-  name            String
-  militaryNo      String          @id @unique
-  nationalNo      String          @unique
-  seglNo          Int
-  marhla          Int
-  qualificationId Int
-  qualification   Qualification   @relation(fields: [qualificationId], references: [id])
-  religionId      Int
-  religion        Religion        @relation(fields: [religionId], references: [id])
-  centerId        Int
-  center          Center          @relation(fields: [centerId], references: [id])
-  tagneedFactorId Int
-  tagneedFactor   TagneedFactor   @relation(fields: [tagneedFactorId], references: [id])
-  faselaId        Int?
-  fasela          Fasela?         @relation(fields: [faselaId], references: [id])
-  statusId        Int?
-  status          Status?         @relation(fields: [statusId], references: [id])
-  rankId          Int?
-  rank            Rank?           @relation(fields: [rankId], references: [id])
-  address         String?
-  TawzeaHistory   TawzeaHistory[]
-  curTawzeaId     Int?
-  curTawzea       TawzeaHistory?  @relation("CurrentTawzea", fields: [curTawzeaId], references: [id])
-  Tarheal         Tarheal?
+  name              String
+  militaryNo        String          @id @unique
+  nationalNo        String          @unique
+  seglNo            Int
+  marhla            Int
+  qualificationId   Int
+  qualification     Qualification   @relation(fields: [qualificationId], references: [id])
+  religionId        Int
+  religion          Religion        @relation(fields: [religionId], references: [id])
+  centerId          Int
+  center            Center          @relation(fields: [centerId], references: [id])
+  tagneedFactorId   Int
+  tagneedFactor     TagneedFactor   @relation(fields: [tagneedFactorId], references: [id])
+  faselaId          Int?
+  fasela            Fasela?         @relation(fields: [faselaId], references: [id])
+  statusId          Int?
+  status            Status?         @relation(fields: [statusId], references: [id])
+  rankId            Int?
+  rank              Rank?           @relation(fields: [rankId], references: [id])
+  address           String?
+  TawzeaHistory     TawzeaHistory[]
+  curTawzeaId       Int?
+  curTawzea         TawzeaHistory?  @relation("CurrentTawzea", fields: [curTawzeaId], references: [id])
+  Tarheal           Tarheal?
+  predefinedEtgahId Int
+  predefinedEtgah   Etgah           @relation(fields: [predefinedEtgahId], references: [id])
 
   @@unique([seglNo, marhla])
 }
@@ -133,9 +135,10 @@ model Weapon {
 }
 
 model Etgah {
-  id   Int    @id
-  name String @unique
-  Unit Unit[]
+  id      Int       @id
+  name    String    @unique
+  Unit    Unit[]
+  Soldier Soldier[]
 }
 
 model Unit {

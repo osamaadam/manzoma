@@ -1,21 +1,20 @@
 import { useQuery } from "@apollo/client";
 import { Input } from "antd";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useInView } from "react-intersection-observer";
 import {
   Column,
   useAsyncDebounce,
-  useBlockLayout,
   useGlobalFilter,
   useSortBy,
   useTable,
 } from "react-table";
-import AutoSizer from "react-virtualized-auto-sizer";
-import { VariableSizeList } from "react-window";
 import { soldiersQuery } from "src/graphql/soldiersQuery";
 import { Soldier } from "type-graphql";
 
 const Newcomers = () => {
   const [soldiers, setSoldiers] = useState<Soldier[]>([]);
+  const [lastVisibleIndex, setLastVisibleIndex] = useState(1);
   const { data } = useQuery<{ soldiers: Soldier[] }>(soldiersQuery, {
     variables: {
       orderBy: {
@@ -27,7 +26,6 @@ const Newcomers = () => {
   useEffect(() => {
     if (data?.soldiers) {
       setSoldiers(data.soldiers);
-      console.log(data.soldiers);
     }
   }, [data]);
 
@@ -53,6 +51,18 @@ const Newcomers = () => {
         Header: "القسم/المركز",
         accessor: (record) => record.center?.name,
       },
+      {
+        Header: "المؤهل",
+        accessor: (record) => record.qualification?.name,
+      },
+      {
+        Header: "الاتجاه",
+        accessor: (record) => record.predefinedEtgah?.name,
+      },
+      {
+        Header: "الموقف",
+        accessor: (record) => record.status?.name ?? "بدون",
+      },
     ],
     []
   );
@@ -71,26 +81,16 @@ const Newcomers = () => {
       columns,
     },
     useGlobalFilter,
-    useSortBy,
-    useBlockLayout
+    useSortBy
   );
+
+  const { ref, inView } = useInView();
 
   const onSearchChange = useAsyncDebounce((val) => setGlobalFilter(val), 300);
 
-  const RenderRow = useCallback(
-    ({ index }) => {
-      const row = rows[index];
-      prepareRow(row);
-      return (
-        <tr {...row.getRowProps()}>
-          {row.cells.map((cell) => (
-            <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
-          ))}
-        </tr>
-      );
-    },
-    [prepareRow, rows]
-  );
+  useEffect(() => {
+    if (inView) setLastVisibleIndex((prev) => prev + 50);
+  }, [inView]);
 
   return (
     <>
@@ -115,22 +115,22 @@ const Newcomers = () => {
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          <AutoSizer>
-            {({ height, width }) => {
-              console.log({ height, width });
+          {rows.map((row, index) => {
+            prepareRow(row);
+            if (index <= lastVisibleIndex)
               return (
-                <VariableSizeList
-                  height={height + 100}
-                  itemCount={rows.length}
-                  itemSize={() => 35}
-                  direction="rtl"
-                  width={width}
+                <tr
+                  {...row.getRowProps()}
+                  ref={index === lastVisibleIndex ? ref : undefined}
                 >
-                  {RenderRow}
-                </VariableSizeList>
+                  {row.cells.map((cell) => (
+                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                  ))}
+                </tr>
               );
-            }}
-          </AutoSizer>
+
+            return null;
+          })}
         </tbody>
       </table>
     </>
