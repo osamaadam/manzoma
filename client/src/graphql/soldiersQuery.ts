@@ -23,6 +23,14 @@ export const soldiersQuery = gql`
       marhla
       name
       registerationDate
+      TawzeaHistory(take: 1, orderBy: { id: desc }) {
+        unit {
+          name
+          etgah {
+            name
+          }
+        }
+      }
       qualification {
         name
       }

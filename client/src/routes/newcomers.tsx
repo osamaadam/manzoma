@@ -61,7 +61,16 @@ const Newcomers = () => {
       {
         Header: "الاتجاه",
         accessor: (record) =>
-          record.curTawzea?.unit?.etgah?.name ?? record.predefinedEtgah?.name,
+          record.TawzeaHistory?.length
+            ? record.TawzeaHistory[0]?.unit?.etgah?.name
+            : record.predefinedEtgah?.name,
+      },
+      {
+        Header: "التوزيع",
+        accessor: (record) =>
+          record.TawzeaHistory?.length
+            ? record.TawzeaHistory[0]?.unit?.name
+            : "بدون توزيع",
       },
       {
         Header: "الموقف",

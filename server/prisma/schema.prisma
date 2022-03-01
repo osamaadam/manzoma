@@ -100,8 +100,6 @@ model Soldier {
   rank              Rank?           @relation(fields: [rankId], references: [id])
   address           String?
   TawzeaHistory     TawzeaHistory[]
-  curTawzeaId       Int?
-  curTawzea         TawzeaHistory?  @relation("CurrentTawzea", fields: [curTawzeaId], references: [id])
   Tarheal           Tarheal?
   predefinedEtgahId Int
   predefinedEtgah   Etgah           @relation(fields: [predefinedEtgahId], references: [id])
@@ -167,7 +165,14 @@ model TawzeaHistory {
   pageNo           Int
   receivedTawzeaId Int
   receivedTawzea   ReceivedTawzea @relation(fields: [receivedTawzeaId], references: [id])
-  Soldier          Soldier[]      @relation("CurrentTawzea")
+  specializationId Int
+  specialization   Specialization @relation(fields: [specializationId], references: [id])
+}
+
+model Specialization {
+  id            Int             @id @default(autoincrement())
+  name          String
+  TawzeaHistory TawzeaHistory[]
 }
 
 model ReceivedTawzea {
