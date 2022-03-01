@@ -1,5 +1,6 @@
 import { useQuery } from "@apollo/client";
 import { Input } from "antd";
+import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import InView, { useInView } from "react-intersection-observer";
 import {
@@ -59,11 +60,23 @@ const Newcomers = () => {
       },
       {
         Header: "الاتجاه",
-        accessor: (record) => record.predefinedEtgah?.name,
+        accessor: (record) =>
+          record.curTawzea?.unit?.etgah?.name ?? record.predefinedEtgah?.name,
       },
       {
         Header: "الموقف",
         accessor: (record) => record.status?.name ?? "بدون",
+      },
+      {
+        Header: "تاريخ الإلحاق",
+        accessor: (record) =>
+          DateTime.fromISO(record.registerationDate.toString()).toFormat(
+            "yyyyMMdd"
+          ),
+        Cell: ({ value }: { value: string }) =>
+          DateTime.fromFormat(value, "yyyyMMdd")
+            .setLocale("ar-EG")
+            .toLocaleString({ dateStyle: "long" }),
       },
     ],
     []
@@ -88,14 +101,17 @@ const Newcomers = () => {
 
   const { ref, inView } = useInView({ threshold: 0.1 });
 
-  const onSearchChange = useAsyncDebounce((val) => setGlobalFilter(val), 300);
+  const onSearchChange = useAsyncDebounce(
+    (val: string) => setGlobalFilter(val.trim()),
+    300
+  );
 
   useEffect(() => {
     if (inView) setLastVisibleIndex((prev) => prev + 50);
   }, [inView]);
 
   return (
-    <>
+    <div className="newcomers__container">
       <Input.Search
         autoFocus
         placeholder="بحث"
@@ -155,7 +171,7 @@ const Newcomers = () => {
           </table>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

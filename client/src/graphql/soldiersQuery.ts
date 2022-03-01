@@ -22,6 +22,7 @@ export const soldiersQuery = gql`
       nationalNo
       marhla
       name
+      registerationDate
       qualification {
         name
       }

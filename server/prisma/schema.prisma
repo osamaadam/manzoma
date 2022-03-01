@@ -83,6 +83,7 @@ model Soldier {
   nationalNo        String          @unique
   seglNo            Int
   marhla            Int
+  registerationDate DateTime        @default(now())
   qualificationId   Int
   qualification     Qualification   @relation(fields: [qualificationId], references: [id])
   religionId        Int
