@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "*": ["../server/node_modules/@generated/*", "node_modules/*"]
+    }
+  }
+}

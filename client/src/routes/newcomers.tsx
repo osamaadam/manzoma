@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/client";
 import { Input } from "antd";
 import { DateTime } from "luxon";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import InView, { useInView } from "react-intersection-observer";
 import {
   Column,
@@ -10,14 +10,15 @@ import {
   useSortBy,
   useTable,
 } from "react-table";
-import { soldiersQuery } from "src/graphql/soldiersQuery";
 import { Soldier } from "type-graphql";
+import { soldiersQuery } from "../graphql/soldiersQuery";
 import "../table.less";
 import "./newcomers.less";
 
 const Newcomers = () => {
   const [soldiers, setSoldiers] = useState<Soldier[]>([]);
   const [lastVisibleIndex, setLastVisibleIndex] = useState(1);
+  const scrollingRef = useRef<HTMLDivElement>(null);
   const { data } = useQuery<{ soldiers: Soldier[] }>(soldiersQuery, {
     variables: {
       orderBy: {
@@ -66,7 +67,7 @@ const Newcomers = () => {
             : record.predefinedEtgah?.name,
       },
       {
-        Header: "التوزيع",
+        Header: "الوحدة",
         accessor: (record) =>
           record.TawzeaHistory?.length
             ? record.TawzeaHistory[0]?.unit?.name
@@ -108,7 +109,11 @@ const Newcomers = () => {
     useSortBy
   );
 
-  const { ref, inView } = useInView({ threshold: 0.1 });
+  const { ref, inView } = useInView({
+    threshold: 0,
+    root: scrollingRef.current,
+    rootMargin: "500px",
+  });
 
   const onSearchChange = useAsyncDebounce(
     (val: string) => setGlobalFilter(val.trim()),
@@ -119,6 +124,7 @@ const Newcomers = () => {
     if (inView) setLastVisibleIndex((prev) => prev + 50);
   }, [inView]);
 
+  if (!soldiers.length) return null;
   return (
     <div className="newcomers__container">
       <Input.Search
@@ -129,7 +135,7 @@ const Newcomers = () => {
           onSearchChange(val);
         }}
       />
-      <div className="newcomers__table-container">
+      <div ref={scrollingRef} className="newcomers__table-container">
         <div className="newcomers__table-container__inner-container">
           <table {...getTableProps()}>
             <thead>
@@ -149,28 +155,39 @@ const Newcomers = () => {
                 prepareRow(row);
                 if (index <= lastVisibleIndex)
                   return (
-                    <InView onChange={(inView) => console.log(inView)}>
-                      {({ inView, ref: innerRef }) => (
-                        <tr
-                          {...row.getRowProps()}
-                          ref={index === lastVisibleIndex ? ref : innerRef}
-                          className={`${
-                            row.original.status?.id === 1 ? "mawkef-teby" : ""
-                          } ${
-                            row.original.status?.id === 2 ? "raft-teby" : ""
-                          }`}
-                        >
-                          {inView ? (
-                            row.cells.map((cell) => (
-                              <td {...cell.getCellProps()}>
-                                {cell.render("Cell")}
-                              </td>
-                            ))
-                          ) : (
-                            <td style={{ display: "inline-block" }}></td>
-                          )}
-                        </tr>
-                      )}
+                    <InView
+                      root={scrollingRef.current}
+                      rootMargin="500px"
+                      threshold={0}
+                      onChange={(inView) => console.log(inView)}
+                    >
+                      {({ inView, ref: innerRef }) => {
+                        return (
+                          <tr
+                            {...row.getRowProps()}
+                            ref={index === lastVisibleIndex ? ref : innerRef}
+                            className={`${
+                              row.original.status?.id === 1 ? "mawkef-teby" : ""
+                            } ${
+                              row.original.status?.id === 2 ? "raft-teby" : ""
+                            }`}
+                          >
+                            {inView ? (
+                              row.cells.map((cell) => (
+                                <td {...cell.getCellProps()}>
+                                  {cell.render("Cell")}
+                                </td>
+                              ))
+                            ) : (
+                              <td
+                                style={{
+                                  display: "inline-block",
+                                }}
+                              ></td>
+                            )}
+                          </tr>
+                        );
+                      }}
                     </InView>
                   );
 
