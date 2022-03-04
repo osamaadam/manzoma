@@ -112,7 +112,7 @@ const Newcomers = () => {
   const { ref, inView } = useInView({
     threshold: 0,
     root: scrollingRef.current,
-    rootMargin: "500px",
+    rootMargin: "1000px",
   });
 
   const onSearchChange = useAsyncDebounce(
@@ -157,7 +157,7 @@ const Newcomers = () => {
                   return (
                     <InView
                       root={scrollingRef.current}
-                      rootMargin="500px"
+                      rootMargin="1000px"
                       threshold={0}
                       onChange={(inView) => console.log(inView)}
                     >
@@ -172,19 +172,13 @@ const Newcomers = () => {
                               row.original.status?.id === 2 ? "raft-teby" : ""
                             }`}
                           >
-                            {inView ? (
-                              row.cells.map((cell) => (
-                                <td {...cell.getCellProps()}>
-                                  {cell.render("Cell")}
-                                </td>
-                              ))
-                            ) : (
-                              <td
-                                style={{
-                                  display: "inline-block",
-                                }}
-                              ></td>
-                            )}
+                            {inView
+                              ? row.cells.map((cell) => (
+                                  <td {...cell.getCellProps()}>
+                                    {cell.render("Cell")}
+                                  </td>
+                                ))
+                              : null}
                           </tr>
                         );
                       }}
