@@ -1,37 +1,41 @@
-import { useQuery } from "@apollo/client";
-import { Input } from "antd";
+import { useLazyQuery } from "@apollo/client";
 import { DateTime } from "luxon";
-import { useEffect, useMemo, useRef, useState } from "react";
-import InView, { useInView } from "react-intersection-observer";
-import {
-  Column,
-  useAsyncDebounce,
-  useGlobalFilter,
-  useSortBy,
-  useTable,
-} from "react-table";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Column } from "react-table";
 import { Soldier } from "type-graphql";
+import InfiniteTable from "../components/InfiniteTable";
+import SoldierSearch from "../components/SoldierSearch";
+import TableStats from "../components/TableStats";
 import { soldiersQuery } from "../graphql/soldiersQuery";
 import "../table.less";
 import "./newcomers.less";
 
+const PAGE_SIZE = 50;
+
 const Newcomers = () => {
   const [soldiers, setSoldiers] = useState<Soldier[]>([]);
-  const [lastVisibleIndex, setLastVisibleIndex] = useState(1);
-  const scrollingRef = useRef<HTMLDivElement>(null);
-  const { data } = useQuery<{ soldiers: Soldier[] }>(soldiersQuery, {
-    variables: {
-      orderBy: {
-        seglNo: "asc",
-      },
-    },
-  });
+
+  const [fetchSoldiers, fetchSoldiersResponse] =
+    useLazyQuery<{ soldiers: Soldier[] }>(soldiersQuery);
 
   useEffect(() => {
-    if (data?.soldiers) {
-      setSoldiers(data.soldiers);
+    console.log("fired");
+    fetchSoldiers({
+      variables: {
+        orderBy: {
+          seglNo: "asc",
+        },
+        take: 50,
+      },
+    });
+  }, [fetchSoldiers]);
+
+  useEffect(() => {
+    if (fetchSoldiersResponse.data?.soldiers) {
+      const { soldiers } = fetchSoldiersResponse.data;
+      setSoldiers((prev) => [...prev, ...soldiers]);
     }
-  }, [data]);
+  }, [fetchSoldiersResponse.data]);
 
   const columns: Column<Soldier>[] = useMemo(
     (): Column<Soldier>[] => [
@@ -92,105 +96,44 @@ const Newcomers = () => {
     []
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    // @ts-ignore
-    setGlobalFilter,
-  } = useTable(
-    {
-      data: soldiers,
-      columns,
-    },
-    useGlobalFilter,
-    useSortBy
-  );
-
-  const { ref, inView } = useInView({
-    threshold: 0,
-    root: scrollingRef.current,
-    rootMargin: "1000px",
-  });
-
-  const onSearchChange = useAsyncDebounce(
-    (val: string) => setGlobalFilter(val.trim()),
-    300
-  );
-
-  useEffect(() => {
-    if (inView) setLastVisibleIndex((prev) => prev + 50);
-  }, [inView]);
+  const fetchMore = useCallback(() => {
+    fetchSoldiers({
+      variables: {
+        orderBy: {
+          seglNo: "asc",
+        },
+        cursor: {
+          militaryNo: soldiers[soldiers.length - 1].militaryNo,
+        },
+        skip: 1,
+        take: PAGE_SIZE,
+      },
+    });
+  }, [fetchSoldiers, soldiers]);
 
   if (!soldiers.length) return null;
   return (
     <div className="newcomers__container">
-      <Input.Search
-        autoFocus
-        placeholder="بحث"
-        onChange={(e) => {
-          const val = e.target.value;
-          onSearchChange(val);
-        }}
+      <SoldierSearch />
+      <InfiniteTable
+        autoPaginate
+        pageSize={PAGE_SIZE}
+        columns={columns}
+        rows={soldiers}
+        onScrollHitLast={fetchMore}
+        searchValue={""}
+        setRowClassName={(row) =>
+          `${row.original.status?.id === 1 ? "mawkef-teby" : ""} ${
+            row.original.status?.id === 2 ? "raft-teby" : ""
+          }`
+        }
       />
-      <div ref={scrollingRef} className="newcomers__table-container">
-        <div className="newcomers__table-container__inner-container">
-          <table {...getTableProps()}>
-            <thead>
-              {headerGroups.map((group) => (
-                <tr {...group.getHeaderGroupProps()}>
-                  {group.headers.map((col) => (
-                    // @ts-ignore
-                    <th {...col.getHeaderProps(col.getSortByToggleProps())}>
-                      {col.render("Header")}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody {...getTableBodyProps()}>
-              {rows.map((row, index) => {
-                prepareRow(row);
-                if (index <= lastVisibleIndex)
-                  return (
-                    <InView
-                      root={scrollingRef.current}
-                      rootMargin="1000px"
-                      threshold={0}
-                      onChange={(inView) => console.log(inView)}
-                    >
-                      {({ inView, ref: innerRef }) => {
-                        return (
-                          <tr
-                            {...row.getRowProps()}
-                            ref={index === lastVisibleIndex ? ref : innerRef}
-                            className={`${
-                              row.original.status?.id === 1 ? "mawkef-teby" : ""
-                            } ${
-                              row.original.status?.id === 2 ? "raft-teby" : ""
-                            }`}
-                          >
-                            {inView
-                              ? row.cells.map((cell) => (
-                                  <td {...cell.getCellProps()}>
-                                    {cell.render("Cell")}
-                                  </td>
-                                ))
-                              : null}
-                          </tr>
-                        );
-                      }}
-                    </InView>
-                  );
-
-                return null;
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <TableStats
+        filteredMawkef={soldiers.filter((sol) => sol.status?.id === 1).length}
+        filteredRaft={soldiers.filter((sol) => sol.status?.id === 2).length}
+        filteredSoldiers={soldiers.length}
+        marhla={20221}
+      />
     </div>
   );
 };
