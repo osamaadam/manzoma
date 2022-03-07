@@ -15,6 +15,7 @@ import {
   InMemoryCache,
 } from "@apollo/client";
 import { BrowserRouter } from "react-router-dom";
+import { Soldier } from "type-graphql";
 
 export const URI =
   process.env.NODE_ENV === "production" ? "/api" : "http://localhost:4000";
@@ -27,7 +28,21 @@ export const apolloClient = new ApolloClient({
   link: createHttpLink({
     uri: GRAPHQL_URI,
   }),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          soldiers: {
+            keyArgs: false,
+            merge: (prev: Soldier[] = [], incoming: Soldier[]) => [
+              ...prev,
+              ...incoming,
+            ],
+          },
+        },
+      },
+    },
+  }),
 });
 
 store.subscribe(() => {

@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
 import { Col, Row, Statistic } from "antd";
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import { statsQuery } from "../graphql/statsQuery";
 
 interface Props {
@@ -27,10 +27,6 @@ const TableStats: FC<Props> = ({
       marhla,
     },
   });
-
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   return (
     <Row gutter={16} justify="space-between" align="middle">

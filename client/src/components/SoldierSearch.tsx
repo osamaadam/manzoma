@@ -1,39 +1,86 @@
-import { useLazyQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { Input, Select } from "antd";
 import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
-import { availableGovsQuery } from "../graphql/availableGovsQuery";
+import { availableOptsQuery } from "../graphql/availableOptsQuery";
 import "./soldier-search.less";
 
-const FREE_SEARCH_MODES = ["name", "seglNo", "militaryNo"];
+const FREE_SEARCH_MODES: SearchMode[] = ["name", "seglNo", "militaryNo"];
 
 interface Opt {
   id: number;
   name: string;
 }
 
-const SoldierSearch = () => {
-  const [searchMode, setSearchMode] = useState("name");
+type SearchMode =
+  | "name"
+  | "seglNo"
+  | "militaryNo"
+  | "qualification"
+  | "etgah"
+  | "tawzea"
+  | "gov"
+  | "center"
+  | "registerationDate";
+
+interface Props {
+  marhla: number;
+  filterSoldiers: (variables: any) => void;
+  clearFilter: () => void;
+}
+
+const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
+  const [searchMode, setSearchMode] = useState<SearchMode>("name");
   const [searchOpts, setSearchOpts] = useState<Opt[]>([]);
 
-  const [fetchAvailableGovs, availableGovsResponse] =
-    useLazyQuery<{ availableGovs: Opt[] }>(availableGovsQuery);
+  const { data, loading, refetch } = useQuery<{
+    availableUnits: Opt[];
+    availableGovs: Opt[];
+    availableCenters: Opt[];
+    availableQualifications: Opt[];
+    etgahs: Opt[];
+  }>(availableOptsQuery, {
+    variables: {
+      marhla,
+    },
+  });
 
   useEffect(() => {
-    switch (searchMode) {
-      case "gov":
-        fetchAvailableGovs({ variables: { marhla: 20221 } });
-        break;
-      default:
-        break;
-    }
-  }, [fetchAvailableGovs, searchMode]);
+    refetch({ marhla });
+  }, [marhla, refetch]);
 
   useEffect(() => {
-    if (availableGovsResponse.data) {
-      setSearchOpts(availableGovsResponse.data.availableGovs);
-    }
-  }, [availableGovsResponse.data]);
+    if (data) {
+      const {
+        availableCenters,
+        availableGovs,
+        availableQualifications,
+        availableUnits,
+        etgahs,
+      } = data;
 
+      switch (searchMode) {
+        case "center":
+          setSearchOpts(availableCenters);
+          break;
+        case "gov":
+          setSearchOpts(availableGovs);
+          break;
+        case "qualification":
+          setSearchOpts(availableQualifications);
+          break;
+        case "tawzea":
+          setSearchOpts(availableUnits);
+          break;
+        case "etgah":
+          setSearchOpts(etgahs);
+          break;
+        default:
+          break;
+      }
+    }
+  }, [data, searchMode]);
+
+  if (!data) return <></>;
   return (
     <section className="soldier-search__container">
       {FREE_SEARCH_MODES.includes(searchMode) ? (
@@ -42,6 +89,43 @@ const SoldierSearch = () => {
           addonBefore={
             <ModeSelect searchMode={searchMode} setSearchMode={setSearchMode} />
           }
+          allowClear
+          onChange={(e) => {
+            const { value } = e.target;
+            if (value.trim().length) {
+              let variables: any = {
+                take: undefined,
+              };
+              switch (searchMode) {
+                case "name":
+                  variables.where = {
+                    name: {
+                      contains: value,
+                    },
+                  };
+                  break;
+                case "seglNo":
+                  variables.where = {
+                    seglNo: {
+                      equals: +value,
+                    },
+                  };
+                  break;
+                case "militaryNo":
+                  variables.where = {
+                    militaryNo: {
+                      contains: value,
+                    },
+                  };
+                  break;
+                default:
+                  break;
+              }
+              filterSoldiers(variables);
+            } else {
+              clearFilter();
+            }
+          }}
         />
       ) : (
         <DoubleSelect
@@ -50,10 +134,80 @@ const SoldierSearch = () => {
           className="soldier-search__grp-container"
         >
           <Select
-            loading={availableGovsResponse.loading}
+            loading={loading}
             showSearch
+            allowClear
             className="soldier-search__flex-dropdown"
+            onClear={() => clearFilter()}
+            onSelect={(_, { key }) => {
+              let variables: any = {};
+              switch (searchMode) {
+                case "qualification":
+                  variables.where = {
+                    qualificationId: {
+                      equals: Number(key),
+                    },
+                  };
+                  break;
+                case "etgah":
+                  variables.where = {
+                    predefinedEtgahId: {
+                      equals: Number(key),
+                    },
+                  };
+                  break;
+                case "gov":
+                  variables.where = {
+                    center: {
+                      is: {
+                        govId: {
+                          equals: Number(key),
+                        },
+                      },
+                    },
+                  };
+                  break;
+                case "center":
+                  variables.where = {
+                    centerId: {
+                      equals: Number(key),
+                    },
+                  };
+                  break;
+                case "tawzea":
+                  if (Number(key) !== 0)
+                    variables.where = {
+                      TawzeaHistory: {
+                        some: {
+                          unitId: {
+                            equals: Number(key),
+                          },
+                        },
+                      },
+                    };
+                  else
+                    variables.where = {
+                      TawzeaHistory: {
+                        none: {
+                          id: {
+                            gt: 0,
+                          },
+                        },
+                      },
+                    };
+                  break;
+                default:
+                  break;
+              }
+
+              filterSoldiers(variables);
+            }}
           >
+            {searchMode === "tawzea" ? (
+              <Select.Option key={0} value="بدون توزيع">
+                بدون توزيع
+              </Select.Option>
+            ) : null}
             {searchOpts.map((opt) => (
               <Select.Option key={opt.id} value={opt.name}>
                 {opt.name}
@@ -67,8 +221,8 @@ const SoldierSearch = () => {
 };
 
 const DoubleSelect: FC<{
-  searchMode: string;
-  setSearchMode: Dispatch<SetStateAction<string>>;
+  searchMode: SearchMode;
+  setSearchMode: Dispatch<SetStateAction<SearchMode>>;
   className?: string;
 }> = ({ children, searchMode, setSearchMode, className = "" }) => {
   return (
@@ -80,10 +234,10 @@ const DoubleSelect: FC<{
 };
 
 const ModeSelect: FC<{
-  searchMode: string;
-  setSearchMode: Dispatch<SetStateAction<string>>;
+  searchMode: SearchMode;
+  setSearchMode: Dispatch<SetStateAction<SearchMode>>;
 }> = ({ searchMode, setSearchMode }) => {
-  const searchOptions: { value: string; displayName: string }[] = [
+  const searchOptions: { value: SearchMode; displayName: string }[] = [
     {
       value: "name",
       displayName: "الاسم",
@@ -126,13 +280,14 @@ const ModeSelect: FC<{
     <Select
       value={searchMode}
       onSelect={(val) => {
-        console.log(val);
         setSearchMode(val);
       }}
       className="soldier-search__dropdown"
     >
       {searchOptions.map((opt) => (
-        <Select.Option value={opt.value}>{opt.displayName}</Select.Option>
+        <Select.Option key={opt.value} value={opt.value}>
+          {opt.displayName}
+        </Select.Option>
       ))}
     </Select>
   );

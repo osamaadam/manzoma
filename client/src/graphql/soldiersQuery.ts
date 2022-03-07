@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const soldiersQuery = gql`
-  query (
+  query SoldiersQuery(
     $where: SoldierWhereInput
     $orderBy: [SoldierOrderByWithRelationInput!]
     $cursor: SoldierWhereUniqueInput
@@ -51,6 +51,12 @@ export const soldiersQuery = gql`
         name
       }
       address
+    }
+    groupBySoldier(by: [marhla, statusId], where: $where) {
+      _count {
+        statusId
+        militaryNo
+      }
     }
   }
 `;

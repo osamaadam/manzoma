@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const statsQuery = gql`
-  query ($marhla: Int!) {
+  query SoldierStatsQuery($marhla: Int!) {
     stats(marhla: $marhla) {
       totalSoldiers
       totalMawkef

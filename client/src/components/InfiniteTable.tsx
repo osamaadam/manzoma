@@ -19,7 +19,7 @@ const InfiniteTable = <T,>({
   searchValue,
   pageSize = 50,
   autoPaginate = false,
-  rootMargin = "1000px",
+  rootMargin = "400px",
   setRowClassName = () => "",
   onScrollHitLast,
 }: Props<T>) => {
@@ -56,8 +56,8 @@ const InfiniteTable = <T,>({
   }, [autoPaginate, inView, onScrollHitLast, pageSize]);
 
   useEffect(() => {
-    console.log(lastVisibleIndex);
-  }, [lastVisibleIndex]);
+    if (rows.length === pageSize) setLastVisibleIndex(5);
+  }, [pageSize, rows.length]);
 
   useEffect(() => {
     setGlobalFilter(searchValue.trim());
@@ -85,6 +85,7 @@ const InfiniteTable = <T,>({
               if (index <= lastVisibleIndex)
                 return (
                   <InView
+                    key={row.id}
                     root={scrollingRef.current}
                     rootMargin={rootMargin}
                     threshold={0.1}

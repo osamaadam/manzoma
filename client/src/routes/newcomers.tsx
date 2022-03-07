@@ -1,6 +1,6 @@
-import { useLazyQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { DateTime } from "luxon";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useRef } from "react";
 import { Column } from "react-table";
 import { Soldier } from "type-graphql";
 import InfiniteTable from "../components/InfiniteTable";
@@ -13,29 +13,35 @@ import "./newcomers.less";
 const PAGE_SIZE = 50;
 
 const Newcomers = () => {
-  const [soldiers, setSoldiers] = useState<Soldier[]>([]);
-
-  const [fetchSoldiers, fetchSoldiersResponse] =
-    useLazyQuery<{ soldiers: Soldier[] }>(soldiersQuery);
-
-  useEffect(() => {
-    console.log("fired");
-    fetchSoldiers({
-      variables: {
-        orderBy: {
-          seglNo: "asc",
-        },
-        take: 50,
+  const { data, fetchMore, refetch } = useQuery<{
+    soldiers: Soldier[];
+    groupBySoldier: { _count: { militaryNo: number; statusId: number } }[];
+  }>(soldiersQuery, {
+    variables: {
+      take: PAGE_SIZE,
+      orderBy: {
+        seglNo: "asc",
       },
-    });
-  }, [fetchSoldiers]);
+    },
+    onError: (err) => console.error(err),
+  });
+  const filterDebounceRef = useRef<NodeJS.Timeout>();
 
-  useEffect(() => {
-    if (fetchSoldiersResponse.data?.soldiers) {
-      const { soldiers } = fetchSoldiersResponse.data;
-      setSoldiers((prev) => [...prev, ...soldiers]);
-    }
-  }, [fetchSoldiersResponse.data]);
+  const filterSoldiers = (variables: any) => {
+    if (filterDebounceRef.current) clearTimeout(filterDebounceRef.current);
+    filterDebounceRef.current = setTimeout(() => refetch(variables), 500);
+  };
+
+  const clearFilter = () => {
+    console.log("triggered");
+    refetch({
+      take: PAGE_SIZE,
+      orderBy: {
+        seglNo: "asc",
+      },
+      where: undefined,
+    });
+  };
 
   const columns: Column<Soldier>[] = useMemo(
     (): Column<Soldier>[] => [
@@ -96,31 +102,33 @@ const Newcomers = () => {
     []
   );
 
-  const fetchMore = useCallback(() => {
-    fetchSoldiers({
-      variables: {
-        orderBy: {
-          seglNo: "asc",
-        },
-        cursor: {
-          militaryNo: soldiers[soldiers.length - 1].militaryNo,
-        },
-        skip: 1,
-        take: PAGE_SIZE,
-      },
-    });
-  }, [fetchSoldiers, soldiers]);
-
-  if (!soldiers.length) return null;
+  if (!data?.soldiers) return null;
   return (
     <div className="newcomers__container">
-      <SoldierSearch />
+      <SoldierSearch
+        marhla={20221}
+        filterSoldiers={filterSoldiers}
+        clearFilter={clearFilter}
+      />
       <InfiniteTable
         autoPaginate
         pageSize={PAGE_SIZE}
         columns={columns}
-        rows={soldiers}
-        onScrollHitLast={fetchMore}
+        rows={data.soldiers}
+        onScrollHitLast={() =>
+          fetchMore({
+            variables: {
+              orderBy: {
+                seglNo: "asc",
+              },
+              cursor: {
+                militaryNo: data.soldiers[data.soldiers.length - 1].militaryNo,
+              },
+              skip: 1,
+              take: PAGE_SIZE,
+            },
+          })
+        }
         searchValue={""}
         setRowClassName={(row) =>
           `${row.original.status?.id === 1 ? "mawkef-teby" : ""} ${
@@ -129,9 +137,18 @@ const Newcomers = () => {
         }
       />
       <TableStats
-        filteredMawkef={soldiers.filter((sol) => sol.status?.id === 1).length}
-        filteredRaft={soldiers.filter((sol) => sol.status?.id === 2).length}
-        filteredSoldiers={soldiers.length}
+        filteredMawkef={
+          data.groupBySoldier.find((agg) => agg._count.statusId === 1)?._count
+            .militaryNo
+        }
+        filteredRaft={
+          data.groupBySoldier.find((agg) => agg._count.statusId === 2)?._count
+            .militaryNo
+        }
+        filteredSoldiers={data.groupBySoldier.reduce(
+          (prev, agg) => prev + agg._count.militaryNo,
+          0
+        )}
         marhla={20221}
       />
     </div>
