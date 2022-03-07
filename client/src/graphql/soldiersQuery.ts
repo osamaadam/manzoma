@@ -23,12 +23,16 @@ export const soldiersQuery = gql`
       marhla
       name
       registerationDate
-      TawzeaHistory(take: 1, orderBy: { id: desc }) {
+      tawzea {
         unit {
           name
           etgah {
             name
           }
+        }
+        specialization {
+          id
+          name
         }
       }
       qualification {
@@ -53,8 +57,8 @@ export const soldiersQuery = gql`
       address
     }
     groupBySoldier(by: [marhla, statusId], where: $where) {
+      statusId
       _count {
-        statusId
         militaryNo
       }
     }

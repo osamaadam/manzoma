@@ -15,7 +15,7 @@ const PAGE_SIZE = 50;
 const Newcomers = () => {
   const { data, fetchMore, refetch } = useQuery<{
     soldiers: Soldier[];
-    groupBySoldier: { _count: { militaryNo: number; statusId: number } }[];
+    groupBySoldier: { _count: { militaryNo: number }; statusId: number }[];
   }>(soldiersQuery, {
     variables: {
       take: PAGE_SIZE,
@@ -72,16 +72,16 @@ const Newcomers = () => {
       {
         Header: "الاتجاه",
         accessor: (record) =>
-          record.TawzeaHistory?.length
-            ? record.TawzeaHistory[0]?.unit?.etgah?.name
-            : record.predefinedEtgah?.name,
+          record.tawzea?.unit?.etgah?.name ?? record.predefinedEtgah?.name,
       },
       {
         Header: "الوحدة",
+        accessor: (record) => record.tawzea?.unit?.name ?? "بدون توزيع",
+      },
+      {
+        Header: "التخصص",
         accessor: (record) =>
-          record.TawzeaHistory?.length
-            ? record.TawzeaHistory[0]?.unit?.name
-            : "بدون توزيع",
+          record.tawzea?.specialization?.name ?? "بدون تخصص",
       },
       {
         Header: "الموقف",
@@ -138,11 +138,11 @@ const Newcomers = () => {
       />
       <TableStats
         filteredMawkef={
-          data.groupBySoldier.find((agg) => agg._count.statusId === 1)?._count
+          data.groupBySoldier.find((agg) => agg.statusId === 1)?._count
             .militaryNo
         }
         filteredRaft={
-          data.groupBySoldier.find((agg) => agg._count.statusId === 2)?._count
+          data.groupBySoldier.find((agg) => agg.statusId === 2)?._count
             .militaryNo
         }
         filteredSoldiers={data.groupBySoldier.reduce(

@@ -2,8 +2,7 @@ import { PrismaClient, Soldier } from "@prisma/client";
 import { normalizeArabic } from "../src/helpers/normalizeArabic";
 import { query } from "../src/helpers/query";
 
-export const seedSoldiers = async () => {
-  const prisma = new PrismaClient();
+export const seedSoldiers = async (prisma: PrismaClient) => {
   const soldiers = (
     await query<Soldier[]>(`
       select

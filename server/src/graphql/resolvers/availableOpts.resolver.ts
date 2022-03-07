@@ -1,4 +1,10 @@
-import { Gov, Center, Qualification, Unit } from "@generated/type-graphql";
+import {
+  Gov,
+  Center,
+  Qualification,
+  Unit,
+  Status,
+} from "@generated/type-graphql";
 import { Arg, Ctx, Int, Query, Resolver } from "type-graphql";
 import { Context } from "../..";
 
@@ -64,12 +70,28 @@ export class AvailableOpts {
     const units = await prisma.$queryRaw<Unit[]>`
       select u.*
       from Soldier s
-      join TawzeaHistory t on s.militaryNo = t.militaryNo
+      join tawzea t on s.militaryNo = t.militaryNo
       join unit u on t.unitId = u.id
       group by u.id
       order by u.name;
     `;
 
     return units;
+  }
+
+  @Query((returns) => [Status]!)
+  async availableStatuses(
+    @Arg("marhla", (type) => Int) marhla: number,
+    @Ctx() { prisma }: Context
+  ) {
+    const statuses = await prisma.$queryRaw<Unit[]>`
+      select st.*
+      from Soldier s
+      join status st on st.id = s.statusId
+      group by st.id
+      order by st.name;
+    `;
+
+    return statuses;
   }
 }

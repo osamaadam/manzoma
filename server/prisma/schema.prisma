@@ -25,7 +25,7 @@ model User {
 model Tagneed {
   id   Int    @id @default(autoincrement())
   name String @unique
-  Gov  Gov[]
+  gov  Gov[]
 }
 
 model Gov {
@@ -33,19 +33,19 @@ model Gov {
   name      String
   tagneedId Int
   tagneed   Tagneed  @relation(fields: [tagneedId], references: [id])
-  Center    Center[]
+  center    Center[]
 }
 
 model Qualification {
   id      Int       @id
   name    String
-  Soldier Soldier[]
+  soldier Soldier[]
 }
 
 model Religion {
   id      Int       @id
   name    String
-  Soldier Soldier[]
+  soldier Soldier[]
 }
 
 model Center {
@@ -53,20 +53,20 @@ model Center {
   name           String
   govId          Int
   gov            Gov              @relation(fields: [govId], references: [id])
-  Soldier        Soldier[]
-  MilitaryEntity MilitaryEntity[]
+  soldier        Soldier[]
+  militaryEntity MilitaryEntity[]
 }
 
 model TagneedFactor {
   id      Int       @id
   name    String
-  Soldier Soldier[]
+  soldier Soldier[]
 }
 
 model Sarya {
   id     Int      @id @default(autoincrement())
   name   String   @unique
-  Fasela Fasela[]
+  fasela Fasela[]
 }
 
 model Fasela {
@@ -74,35 +74,35 @@ model Fasela {
   name    String
   saryaId Int
   sarya   Sarya     @relation(fields: [saryaId], references: [id])
-  Soldier Soldier[]
+  soldier Soldier[]
 }
 
 model Soldier {
   name              String
-  militaryNo        String          @id @unique
-  nationalNo        String          @unique
+  militaryNo        String        @id @unique
+  nationalNo        String        @unique
   seglNo            Int
   marhla            Int
-  registerationDate DateTime        @default(now())
+  registerationDate DateTime      @default(now())
   qualificationId   Int
-  qualification     Qualification   @relation(fields: [qualificationId], references: [id])
+  qualification     Qualification @relation(fields: [qualificationId], references: [id])
   religionId        Int
-  religion          Religion        @relation(fields: [religionId], references: [id])
+  religion          Religion      @relation(fields: [religionId], references: [id])
   centerId          Int
-  center            Center          @relation(fields: [centerId], references: [id])
+  center            Center        @relation(fields: [centerId], references: [id])
   tagneedFactorId   Int
-  tagneedFactor     TagneedFactor   @relation(fields: [tagneedFactorId], references: [id])
+  tagneedFactor     TagneedFactor @relation(fields: [tagneedFactorId], references: [id])
   faselaId          Int?
-  fasela            Fasela?         @relation(fields: [faselaId], references: [id])
+  fasela            Fasela?       @relation(fields: [faselaId], references: [id])
   statusId          Int?
-  status            Status?         @relation(fields: [statusId], references: [id])
+  status            Status?       @relation(fields: [statusId], references: [id])
   rankId            Int?
-  rank              Rank?           @relation(fields: [rankId], references: [id])
+  rank              Rank?         @relation(fields: [rankId], references: [id])
   address           String?
-  TawzeaHistory     TawzeaHistory[]
-  Tarheal           Tarheal?
+  tawzea            Tawzea?
+  tarheal           Tarheal?
   predefinedEtgahId Int
-  predefinedEtgah   Etgah           @relation(fields: [predefinedEtgahId], references: [id])
+  predefinedEtgah   Etgah         @relation(fields: [predefinedEtgahId], references: [id])
 
   @@unique([seglNo, marhla])
 }
@@ -110,13 +110,13 @@ model Soldier {
 model Rank {
   id      Int       @id
   name    String    @unique
-  Soldier Soldier[]
+  soldier Soldier[]
 }
 
 model Status {
   id      Int       @id @default(autoincrement())
   name    String    @unique
-  Soldier Soldier[]
+  soldier Soldier[]
 }
 
 model MilitaryEntity {
@@ -124,20 +124,21 @@ model MilitaryEntity {
   name     String
   centerId Int?
   center   Center? @relation(fields: [centerId], references: [id])
-  Unit     Unit[]
+  unit     Unit[]
 }
 
 model Weapon {
-  id   Int    @id
-  name String
-  Unit Unit[]
+  id             Int              @id
+  name           String
+  unit           Unit[]
+  specialization Specialization[]
 }
 
 model Etgah {
   id      Int       @id
   name    String    @unique
-  Unit    Unit[]
-  Soldier Soldier[]
+  unit    Unit[]
+  soldier Soldier[]
 }
 
 model Unit {
@@ -151,36 +152,39 @@ model Unit {
   weapon           Weapon?         @relation(fields: [weaponId], references: [id])
   etgahId          Int
   etgah            Etgah           @relation(fields: [etgahId], references: [id])
-  Unit             Unit[]          @relation("UnitToUnit")
-  Tarheal          Tarheal[]
-  TawzeaHistory    TawzeaHistory[]
+  unit             Unit[]          @relation("UnitToUnit")
+  tarheal          Tarheal[]
+  tawzea           Tawzea[]
 }
 
-model TawzeaHistory {
-  id               Int            @id @default(autoincrement())
-  militaryNo       String
-  soldier          Soldier        @relation(fields: [militaryNo], references: [militaryNo])
+model Tawzea {
+  id               Int             @id @default(autoincrement())
+  militaryNo       String          @unique
+  soldier          Soldier         @relation(fields: [militaryNo], references: [militaryNo])
   unitId           Int
-  unit             Unit           @relation(fields: [unitId], references: [id])
+  unit             Unit            @relation(fields: [unitId], references: [id])
   pageNo           Int
   receivedTawzeaId Int
-  receivedTawzea   ReceivedTawzea @relation(fields: [receivedTawzeaId], references: [id])
-  specializationId Int
-  specialization   Specialization @relation(fields: [specializationId], references: [id])
+  receivedTawzea   ReceivedTawzea  @relation(fields: [receivedTawzeaId], references: [id])
+  specializationId Int?
+  specialization   Specialization? @relation(fields: [specializationId], references: [id])
 }
 
 model Specialization {
-  id            Int             @id @default(autoincrement())
-  name          String
-  TawzeaHistory TawzeaHistory[]
+  id       Int      @id @default(autoincrement())
+  name     String
+  weaponId Int?
+  weapon   Weapon?  @relation(fields: [weaponId], references: [id])
+  tawzea   Tawzea[]
 }
 
 model ReceivedTawzea {
-  id            Int             @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
+  marhla        Int
   displayName   String
   numOfPages    Int
-  DateReceived  DateTime
-  TawzeaHistory TawzeaHistory[]
+  dateReceived  DateTime @default(now())
+  tawzeaHistory Tawzea[]
 }
 
 model Tarheal {

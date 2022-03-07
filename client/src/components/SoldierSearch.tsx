@@ -20,7 +20,8 @@ type SearchMode =
   | "tawzea"
   | "gov"
   | "center"
-  | "registerationDate";
+  | "registerationDate"
+  | "status";
 
 interface Props {
   marhla: number;
@@ -37,6 +38,7 @@ const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
     availableGovs: Opt[];
     availableCenters: Opt[];
     availableQualifications: Opt[];
+    availableStatuses: Opt[];
     etgahs: Opt[];
   }>(availableOptsQuery, {
     variables: {
@@ -55,6 +57,7 @@ const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
         availableGovs,
         availableQualifications,
         availableUnits,
+        availableStatuses,
         etgahs,
       } = data;
 
@@ -74,13 +77,15 @@ const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
         case "etgah":
           setSearchOpts(etgahs);
           break;
+        case "status":
+          setSearchOpts(availableStatuses);
+          break;
         default:
           break;
       }
     }
   }, [data, searchMode]);
 
-  if (!data) return <></>;
   return (
     <section className="soldier-search__container">
       {FREE_SEARCH_MODES.includes(searchMode) ? (
@@ -150,6 +155,7 @@ const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
                   };
                   break;
                 case "etgah":
+                  // TODO: doesn't actually work.
                   variables.where = {
                     predefinedEtgahId: {
                       equals: Number(key),
@@ -177,8 +183,8 @@ const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
                 case "tawzea":
                   if (Number(key) !== 0)
                     variables.where = {
-                      TawzeaHistory: {
-                        some: {
+                      tawzea: {
+                        is: {
                           unitId: {
                             equals: Number(key),
                           },
@@ -187,13 +193,21 @@ const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
                     };
                   else
                     variables.where = {
-                      TawzeaHistory: {
-                        none: {
-                          id: {
-                            gt: 0,
-                          },
-                        },
+                      tawzea: {
+                        is: null,
                       },
+                    };
+                  break;
+                case "status":
+                  if (Number(key) !== 0)
+                    variables.where = {
+                      statusId: {
+                        equals: Number(key),
+                      },
+                    };
+                  else
+                    variables.where = {
+                      statusId: null,
                     };
                   break;
                 default:
@@ -206,6 +220,10 @@ const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
             {searchMode === "tawzea" ? (
               <Select.Option key={0} value="بدون توزيع">
                 بدون توزيع
+              </Select.Option>
+            ) : searchMode === "status" ? (
+              <Select.Option key={0} value="بدون موقف">
+                بدون موقف
               </Select.Option>
             ) : null}
             {searchOpts.map((opt) => (
@@ -271,8 +289,8 @@ const ModeSelect: FC<{
       displayName: "المركز / القسم",
     },
     {
-      value: "registerationDate",
-      displayName: "تاريخ الالتحاق",
+      value: "status",
+      displayName: "الموقف",
     },
   ];
 

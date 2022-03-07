@@ -22,5 +22,9 @@ export const availableOptsQuery = gql`
       id
       name
     }
+    availableStatuses(marhla: $marhla) {
+      id
+      name
+    }
   }
 `;

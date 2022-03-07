@@ -3,6 +3,7 @@ import { normalizeArabic } from "../src/helpers/normalizeArabic";
 import { query } from "../src/helpers/query";
 import seedData from "./seed.data";
 import { seedSoldiers } from "./seedSoldiers";
+import { seedSpecs } from "./seedSpecs";
 
 const seed = async () => {
   const prisma = new PrismaClient();
@@ -508,7 +509,11 @@ const seed = async () => {
   } catch (err) {}
 
   try {
-    await seedSoldiers();
+    await seedSoldiers(prisma);
+  } catch (err) {}
+
+  try {
+    await seedSpecs(prisma);
   } catch (err) {}
 };
 
