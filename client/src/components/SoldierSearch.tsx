@@ -155,11 +155,26 @@ const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
                   };
                   break;
                 case "etgah":
-                  // TODO: doesn't actually work.
                   variables.where = {
-                    predefinedEtgahId: {
-                      equals: Number(key),
-                    },
+                    OR: [
+                      {
+                        tawzea: {
+                          is: {
+                            unit: {
+                              is: {
+                                etgah: { is: { id: { equals: Number(key) } } },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      {
+                        AND: [
+                          { tawzea: { is: null } },
+                          { predefinedEtgahId: { equals: Number(key) } },
+                        ],
+                      },
+                    ],
                   };
                   break;
                 case "gov":
