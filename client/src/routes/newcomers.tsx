@@ -59,36 +59,44 @@ const Newcomers = () => {
       },
       {
         Header: "المحافظة",
+        id: "gov",
         accessor: (record) => record.center?.gov?.name,
       },
       {
         Header: "القسم/المركز",
+        id: "center",
         accessor: (record) => record.center?.name,
       },
       {
         Header: "المؤهل",
+        id: "qualification",
         accessor: (record) => record.qualification?.name,
       },
       {
         Header: "الاتجاه",
+        id: "etgah",
         accessor: (record) =>
           record.tawzea?.unit?.etgah?.name ?? record.predefinedEtgah?.name,
       },
       {
         Header: "الوحدة",
+        id: "unit",
         accessor: (record) => record.tawzea?.unit?.name ?? "بدون توزيع",
       },
       {
         Header: "التخصص",
+        id: "specialization",
         accessor: (record) =>
           record.tawzea?.specialization?.name ?? "بدون تخصص",
       },
       {
         Header: "الموقف",
+        id: "status",
         accessor: (record) => record.status?.name ?? "بدون",
       },
       {
         Header: "تاريخ الإلحاق",
+        id: "registerationDate",
         accessor: (record) =>
           DateTime.fromISO(record.registerationDate.toString()).toFormat(
             "yyyyMMdd"
