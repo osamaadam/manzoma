@@ -3,14 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "workspaces": [
+    "server",
+    "client"
+  ],
   "scripts": {
-    "start": "cross-env NODE_ENV=production npm start --prefix server",
+    "start": "cross-env NODE_ENV=production npm start -w server",
     "prestart": "npm run build",
-    "build": "npm run build --prefix server && npm run build --prefix client",
+    "build": "npm run build -w server && npm run build -w client",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:start\"",
-    "server:dev": "npm run dev --prefix server",
-    "client:start": "npm run start --prefix client",
-    "postinstall": "npm install --prefix client && npm install --prefix server"
+    "server:dev": "npm run dev -w server",
+    "client:start": "npm run start -w client",
+    "postinstall": "npm run prisma:generate -w server"
   },
   "repository": {
     "type": "git",

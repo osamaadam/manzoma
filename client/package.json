@@ -4,6 +4,7 @@
   "homepage": "/manzoma",
   "private": true,
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@apollo/client": "^3.5.9",
     "@craco/craco": "^6.4.3",
     "@reduxjs/toolkit": "^1.7.1",
