@@ -1,7 +1,6 @@
-// TODO: Fix soldiers duplicating, and implement a search strategy.
 import { MinusCircleOutlined } from "@ant-design/icons";
-import { useQuery } from "@apollo/client";
-import { Button, Form, Input, Modal, Select } from "antd";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { Button, Form, Input, InputNumber, Modal, Select } from "antd";
 import { useForm } from "antd/lib/form/Form";
 import { DateTime } from "luxon";
 import {
@@ -9,12 +8,13 @@ import {
   FC,
   SetStateAction,
   useCallback,
-  useMemo,
   useRef,
+  useState,
 } from "react";
 import { ReceivedTawzea, Soldier, Specialization, Unit } from "type-graphql";
 import { receivedTawzeasQuery } from "../graphql/receivedTawzeasQuery";
-import { soldiersQuery } from "../graphql/soldiersQuery";
+import { registerTawzeaMutation } from "../graphql/registerTawzeaMutation";
+import { miniSoldierQuery } from "../graphql/soldiersQuery";
 import { specsQuery } from "../graphql/specsQuery";
 import { unitsQuery } from "../graphql/unitsQuery";
 import { useAppSelector } from "../redux/hooks";
@@ -26,26 +26,22 @@ interface Props {
 }
 
 const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
+  const [selectedTawzea, setSelectedTawzea] = useState<ReceivedTawzea>();
   const [form] = useForm();
   const marhla = useAppSelector((state) => state.global.marhla);
   const weaponId = useAppSelector((state) => state.global.weaponId);
   const unitSearchTimeoutRef = useRef<NodeJS.Timeout>();
   const specsSearchTimeoutRef = useRef<NodeJS.Timeout>();
+  const soldiersSearchTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const { data: soldiersData, loading: soldiersLoading } = useQuery<{
-    soldiers: Soldier[];
-  }>(soldiersQuery, {
-    variables: {
-      where: {
-        marhla: {
-          equals: marhla,
-        },
-      },
-      orderBy: {
-        seglNo: "asc",
-      },
-    },
-  });
+  const [mutateTawzeas, { loading: mTawLoading }] = useMutation(
+    registerTawzeaMutation
+  );
+
+  const [fetchSoldiers, { data: soldiersData, loading: soldiersLoading }] =
+    useLazyQuery<{
+      miniSoldiers: Soldier[];
+    }>(miniSoldierQuery);
 
   const { data: rTawData, loading: rTawLoading } = useQuery<{
     receivedTawzeas: ReceivedTawzea[];
@@ -74,7 +70,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
   });
 
   const submit = (values: any) => {
-    console.log(values);
+    mutateTawzeas({ variables: values });
   };
 
   const handleUnitSearch = useCallback(
@@ -130,10 +126,27 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
     [fetchSpecs, weaponId]
   );
 
-  const soldiers = useMemo(
-    () => soldiersData?.soldiers,
-    [soldiersData?.soldiers]
-  );
+  const handleSoldiersSearch = (value: string) => {
+    if (soldiersSearchTimeoutRef.current)
+      clearTimeout(soldiersSearchTimeoutRef.current);
+
+    soldiersSearchTimeoutRef.current = setTimeout(
+      () =>
+        fetchSoldiers({
+          variables: {
+            where: {
+              marhla: {
+                equals: marhla,
+              },
+              seglNo: {
+                equals: +value,
+              },
+            },
+          },
+        }),
+      500
+    );
+  };
 
   return (
     <Modal
@@ -142,6 +155,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
       onOk={() => form.submit()}
       onCancel={() => setIsVisible(false)}
       width={1200}
+      confirmLoading={mTawLoading}
     >
       <Form form={form} name="add-tawzea" onFinish={submit}>
         <Form.Item
@@ -153,20 +167,30 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
             },
           ]}
         >
-          <Select loading={rTawLoading} showSearch allowClear>
+          <Select
+            loading={rTawLoading}
+            showSearch
+            allowClear
+            onSelect={(_, opt) =>
+              setSelectedTawzea(
+                rTawData?.receivedTawzeas.find((taw) => taw.id === opt.value)
+              )
+            }
+          >
             {rTawData?.receivedTawzeas.map((opt) => (
               <Select.Option key={opt.id} value={opt.id}>
                 {opt.displayName} (
                 {DateTime.fromISO(opt.dateReceived.toString())
                   .setLocale("ar-EG")
                   .toLocaleString(DateTime.DATE_MED)}
-                )
+                ) ({opt.numOfPages} صفحة)
               </Select.Option>
             ))}
           </Select>
         </Form.Item>
         <Form.Item label="الوحدة" name="unit" rules={[{ required: true }]}>
           <Select
+            disabled={!form.getFieldValue("receivedTawzea")}
             loading={unitLoading}
             showSearch
             allowClear
@@ -189,12 +213,19 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
           {(fields, { add, remove }) => (
             <>
               {fields.map((field, index) => (
-                <Input.Group compact className="tawzea-modal__input-grp">
+                <Input.Group
+                  key={`${index}-input-grp`}
+                  compact
+                  className="tawzea-modal__input-grp"
+                >
                   <Form.Item
                     {...field}
                     name={[field.name, "militaryNo"]}
                     key={`militaryNo-${index}`}
                     className="tawzea-modal__input-grp__flex-medium-input"
+                    rules={[
+                      { required: true, message: "يرجى ادخال رقم السجل" },
+                    ]}
                   >
                     <Select
                       placeholder="رقم السجل"
@@ -202,12 +233,13 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                       showSearch
                       allowClear
                       optionFilterProp="title"
+                      onSearch={handleSoldiersSearch}
                     >
-                      {soldiers?.map((sol) => (
+                      {soldiersData?.miniSoldiers.map((sol) => (
                         <Select.Option
-                          key={`${index}-${sol.militaryNo}`}
-                          value={+sol.militaryNo}
-                          title={`${sol.name} (${sol.seglNo})`}
+                          key={`index-${sol.militaryNo}`}
+                          value={sol.militaryNo}
+                          title={sol.seglNo.toString()}
                         >
                           {sol.name} ({sol.seglNo})
                         </Select.Option>
@@ -238,6 +270,29 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                         </Select.Option>
                       ))}
                     </Select>
+                  </Form.Item>
+                  <Form.Item
+                    {...field}
+                    key={`pageNo-${index}`}
+                    className="tawzea-modal__input-grp__flex-small-input"
+                    name={[field.name, "pageNo"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "يرجى ادخال رقم الصفحة",
+                      },
+                    ]}
+                  >
+                    <InputNumber
+                      min={1}
+                      max={selectedTawzea?.numOfPages}
+                      style={{ width: "100%" }}
+                      placeholder="رقم الصفحة"
+                      autoComplete="off"
+                      onChange={(val) =>
+                        console.log({ val, pages: selectedTawzea?.numOfPages })
+                      }
+                    />
                   </Form.Item>
                   <Form.Item>
                     <MinusCircleOutlined onClick={() => remove(field.name)} />

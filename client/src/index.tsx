@@ -34,10 +34,11 @@ export const apolloClient = new ApolloClient({
         fields: {
           soldiers: {
             keyArgs: false,
-            merge: (prev: Soldier[] = [], incoming: Soldier[]) => [
-              ...prev,
-              ...incoming,
-            ],
+            merge: (prev: Soldier[] = [], incoming: Soldier[], { args }) => {
+              if (args?.cursor) return [...prev, ...incoming];
+
+              return incoming;
+            },
           },
         },
       },

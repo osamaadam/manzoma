@@ -64,3 +64,30 @@ export const soldiersQuery = gql`
     }
   }
 `;
+
+export const miniSoldierQuery = gql`
+  query MiniSoldiersQuery(
+    $where: SoldierWhereInput!
+    $orderBy: [SoldierOrderByWithRelationInput!]
+    $cursor: SoldierWhereUniqueInput
+    $take: Int
+    $skip: Int
+    $distinct: [SoldierScalarFieldEnum!]
+  ) {
+    miniSoldiers(
+      where: $where
+      orderBy: $orderBy
+      cursor: $cursor
+      take: $take
+      skip: $skip
+      distinct: $distinct
+    ) {
+      seglNo
+      militaryNo
+      nationalNo
+      marhla
+      name
+      registerationDate
+    }
+  }
+`;
