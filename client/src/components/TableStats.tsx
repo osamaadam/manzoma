@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/client";
 import { Col, Row, Statistic } from "antd";
 import { FC } from "react";
-import { statsQuery } from "../graphql/statsQuery";
+import { statsQuery } from "../graphql/stats.query";
 
 interface Props {
   marhla: number;

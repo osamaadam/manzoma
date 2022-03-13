@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/client";
 import { Input, Select } from "antd";
 import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
-import { availableOptsQuery } from "../graphql/availableOptsQuery";
+import { availableOptsQuery } from "../graphql/availableOpts.query";
 import "./soldier-search.less";
 
 const FREE_SEARCH_MODES: SearchMode[] = ["name", "seglNo", "militaryNo"];

@@ -6,7 +6,7 @@ import { Soldier } from "type-graphql";
 import InfiniteTable from "../components/InfiniteTable";
 import SoldierSearch from "../components/SoldierSearch";
 import TableStats from "../components/TableStats";
-import { soldiersQuery } from "../graphql/soldiersQuery";
+import { soldiersQuery } from "../graphql/soldiers.query";
 import "../table.less";
 import "./newcomers.less";
 

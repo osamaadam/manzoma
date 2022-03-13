@@ -12,11 +12,11 @@ import {
   useState,
 } from "react";
 import { ReceivedTawzea, Soldier, Specialization, Unit } from "type-graphql";
-import { receivedTawzeasQuery } from "../graphql/receivedTawzeasQuery";
-import { registerTawzeaMutation } from "../graphql/registerTawzeaMutation";
-import { miniSoldierQuery } from "../graphql/soldiersQuery";
-import { specsQuery } from "../graphql/specsQuery";
-import { unitsQuery } from "../graphql/unitsQuery";
+import { receivedTawzeasQuery } from "../graphql/receivedTawzeas.query";
+import { registerTawzeaMutation } from "../graphql/registerTawzea.mutation";
+import { miniSoldierQuery } from "../graphql/soldiers.query";
+import { specsQuery } from "../graphql/specs.query";
+import { unitsQuery } from "../graphql/units.query";
 import { useAppSelector } from "../redux/hooks";
 import "./tawzea-modal.less";
 
@@ -43,7 +43,11 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
       miniSoldiers: Soldier[];
     }>(miniSoldierQuery);
 
-  const { data: rTawData, loading: rTawLoading } = useQuery<{
+  const {
+    data: rTawData,
+    loading: rTawLoading,
+    refetch: rTawRefetch,
+  } = useQuery<{
     receivedTawzeas: ReceivedTawzea[];
   }>(receivedTawzeasQuery, {
     variables: {
@@ -148,16 +152,28 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
     );
   };
 
+  const handleKeyUp: React.KeyboardEventHandler<HTMLFormElement> = useCallback(
+    (e) => {
+      if (e.key === "Enter") form.submit();
+    },
+    [form]
+  );
+
   return (
     <Modal
-      title="التوزيع"
+      title="إضافة توزيعات"
       visible={isVisible}
       onOk={() => form.submit()}
       onCancel={() => setIsVisible(false)}
       width={1200}
       confirmLoading={mTawLoading}
     >
-      <Form form={form} name="add-tawzea" onFinish={submit}>
+      <Form
+        onKeyUp={handleKeyUp}
+        form={form}
+        name="add-tawzea"
+        onFinish={submit}
+      >
         <Form.Item
           label="التوزيعة المعنية"
           name="receivedTawzea"
@@ -168,6 +184,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
           ]}
         >
           <Select
+            onFocus={() => rTawRefetch()}
             loading={rTawLoading}
             showSearch
             allowClear
