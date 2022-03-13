@@ -118,7 +118,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                     },
                   },
                   {
-                    weaponId: { equals: weaponId },
+                    weaponId: { in: [weaponId, 26] },
                   },
                 ],
               },
@@ -167,6 +167,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
       onCancel={() => setIsVisible(false)}
       width={1200}
       confirmLoading={mTawLoading}
+      destroyOnClose
     >
       <Form
         onKeyUp={handleKeyUp}
@@ -200,7 +201,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                 {DateTime.fromISO(opt.dateReceived.toString())
                   .setLocale("ar-EG")
                   .toLocaleString(DateTime.DATE_MED)}
-                ) ({opt.numOfPages} صفحة)
+                ) ({opt.numOfPages.toLocaleString("ar-EG")} صفحة)
               </Select.Option>
             ))}
           </Select>

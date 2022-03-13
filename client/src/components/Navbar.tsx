@@ -16,6 +16,9 @@ const NavBar = () => {
     <>
       <Menu mode="horizontal">
         <SubMenu key="newcomers" title="المستجدين" disabled={!isLoggedIn}>
+          <Menu.Item key="list">
+            <Link to="/newcomers">قائمة المستجدين</Link>
+          </Menu.Item>
           <Menu.Item key="register">
             <Link to="/newcomers/register">تسجيل</Link>
           </Menu.Item>

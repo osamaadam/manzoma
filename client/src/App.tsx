@@ -1,6 +1,6 @@
 import { createHttpLink } from "@apollo/client";
 import axios from "axios";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import {
   Navigate,
   Route,
@@ -10,13 +10,10 @@ import {
 } from "react-router-dom";
 import { apolloClient, GRAPHQL_URI } from ".";
 import "./app.less";
+import FullPageSpinner from "./components/FullPageSpinner";
 import NavBar from "./components/Navbar";
-import NewComersForm from "./components/NewComersForm";
-import RasdButton from "./components/RasdButton";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { logout, selectToken } from "./redux/slices/user.slice";
-import Login from "./routes/login";
-import Newcomers from "./routes/newcomers";
 
 const App = () => {
   const user = useAppSelector((state) => state.user);
@@ -25,6 +22,11 @@ const App = () => {
   const dispatch = useAppDispatch();
 
   const token = useAppSelector((state) => state.user.details.data?.token);
+
+  const Newcomers = lazy(() => import("./routes/newcomers"));
+  const Login = lazy(() => import("./routes/login"));
+  const NewComersForm = lazy(() => import("./components/NewComersForm"));
+  const RasdButton = lazy(() => import("./components/RasdButton"));
 
   useEffect(() => {
     axios.interceptors.response.use((res) => {
@@ -59,20 +61,22 @@ const App = () => {
       user.details.status === "succeeded" &&
       location.pathname === "/login"
     ) {
-      navigate("/newcomers/register", { replace: true });
+      navigate("/newcomers", { replace: true });
     }
   }, [user, location, navigate]);
 
   return (
     <main className="main-layout">
       <NavBar />
-      <Routes>
-        <Route path="/newcomers/register" element={<NewComersForm />} />
-        <Route path="/report/rasd" element={<RasdButton />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/newcomers" element={<Newcomers />} />
-        <Route path="*" element={<Navigate to="/newcomers/register" />} />
-      </Routes>
+      <Suspense fallback={<FullPageSpinner />}>
+        <Routes>
+          <Route path="/newcomers" element={<Newcomers />} />
+          <Route path="/newcomers/register" element={<NewComersForm />} />
+          <Route path="/report/rasd" element={<RasdButton />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<Navigate to="/newcomers" />} />
+        </Routes>
+      </Suspense>
     </main>
   );
 };

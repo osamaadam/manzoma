@@ -69,6 +69,7 @@ const ReceivedTawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
       onCancel={() => closeModal()}
       onOk={() => form.submit()}
       confirmLoading={loading}
+      destroyOnClose
     >
       <Form
         form={form}
