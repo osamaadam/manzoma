@@ -2,6 +2,7 @@ import { useQuery } from "@apollo/client";
 import { Input, Select } from "antd";
 import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 import { availableOptsQuery } from "../graphql/availableOpts.query";
+import { useAppSelector } from "../redux/hooks";
 import "./soldier-search.less";
 
 const FREE_SEARCH_MODES: SearchMode[] = ["name", "seglNo", "militaryNo"];
@@ -24,14 +25,14 @@ type SearchMode =
   | "status";
 
 interface Props {
-  marhla: number;
   filterSoldiers: (variables: any) => void;
   clearFilter: () => void;
 }
 
-const SoldierSearch: FC<Props> = ({ marhla, clearFilter, filterSoldiers }) => {
+const SoldierSearch: FC<Props> = ({ clearFilter, filterSoldiers }) => {
   const [searchMode, setSearchMode] = useState<SearchMode>("name");
   const [searchOpts, setSearchOpts] = useState<Opt[]>([]);
+  const marhla = useAppSelector(({ global }) => global.marhla);
 
   const { data, loading, refetch } = useQuery<{
     availableUnits: Opt[];

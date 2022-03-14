@@ -110,11 +110,14 @@ const Newcomers = () => {
     []
   );
 
+  const contextMenuAction = (id?: string | number) => {
+    console.log(id);
+  };
+
   if (!data?.soldiers) return null;
   return (
     <div className="newcomers__container">
       <SoldierSearch
-        marhla={20221}
         filterSoldiers={filterSoldiers}
         clearFilter={clearFilter}
       />
@@ -123,6 +126,8 @@ const Newcomers = () => {
         pageSize={PAGE_SIZE}
         columns={columns}
         rows={data.soldiers}
+        uniqueRowId="militaryNo"
+        contextMenuAction={contextMenuAction}
         onScrollHitLast={() =>
           fetchMore({
             variables: {
@@ -157,7 +162,6 @@ const Newcomers = () => {
           (prev, agg) => prev + agg._count.militaryNo,
           0
         )}
-        marhla={20221}
       />
     </div>
   );

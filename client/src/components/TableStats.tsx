@@ -2,20 +2,20 @@ import { useQuery } from "@apollo/client";
 import { Col, Row, Statistic } from "antd";
 import { FC } from "react";
 import { statsQuery } from "../graphql/stats.query";
+import { useAppSelector } from "../redux/hooks";
 
 interface Props {
-  marhla: number;
   filteredSoldiers?: number;
   filteredRaft?: number;
   filteredMawkef?: number;
 }
 
 const TableStats: FC<Props> = ({
-  marhla,
   filteredMawkef,
   filteredRaft,
   filteredSoldiers,
 }) => {
+  const marhla = useAppSelector(({ global }) => global.marhla);
   const { data } = useQuery<{
     stats: {
       totalSoldiers: number;
