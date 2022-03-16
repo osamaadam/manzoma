@@ -2,7 +2,7 @@ import { useMutation } from "@apollo/client";
 import { DatePicker, Form, Input, InputNumber, Modal } from "antd";
 import { useForm } from "antd/lib/form/Form";
 import moment from "moment";
-import { Dispatch, FC, SetStateAction, useCallback, useEffect } from "react";
+import { Dispatch, FC, SetStateAction, useEffect } from "react";
 import { createReceivedTawzeaMutation } from "../graphql/createReceivedTawzea.query";
 import { useAppSelector } from "../redux/hooks";
 
@@ -51,13 +51,6 @@ const ReceivedTawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
     closeModal();
   };
 
-  const handleKeyUp: React.KeyboardEventHandler<HTMLFormElement> = useCallback(
-    (e) => {
-      if (e.key === "Enter") form.submit();
-    },
-    [form]
-  );
-
   useEffect(() => {
     // force rerender on loading state change
   }, [loading]);
@@ -71,12 +64,7 @@ const ReceivedTawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
       confirmLoading={loading}
       destroyOnClose
     >
-      <Form
-        form={form}
-        onKeyUp={handleKeyUp}
-        name="add-received-tawzea"
-        onFinish={submit}
-      >
+      <Form form={form} name="add-received-tawzea" onFinish={submit}>
         <Form.Item
           label="اسم التوزيعة"
           name="displayName"

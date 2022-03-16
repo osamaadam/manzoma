@@ -13,8 +13,7 @@
     "build": "npm run build -w server && npm run build -w client",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:start\"",
     "server:dev": "npm run dev -w server",
-    "client:start": "npm run start -w client",
-    "postinstall": "npm run prisma:generate -w server"
+    "client:start": "npm run start -w client"
   },
   "repository": {
     "type": "git",

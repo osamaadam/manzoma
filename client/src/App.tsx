@@ -15,6 +15,8 @@ import NavBar from "./components/Navbar";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { logout, selectToken } from "./redux/slices/user.slice";
 
+const MAIN_ROUTE = "/newcomers";
+
 const App = () => {
   const user = useAppSelector((state) => state.user);
   const location = useLocation();
@@ -61,7 +63,7 @@ const App = () => {
       user.details.status === "succeeded" &&
       location.pathname === "/login"
     ) {
-      navigate("/newcomers", { replace: true });
+      navigate(MAIN_ROUTE, { replace: true });
     }
   }, [user, location, navigate]);
 
@@ -74,7 +76,7 @@ const App = () => {
           <Route path="/newcomers/register" element={<NewComersForm />} />
           <Route path="/report/rasd" element={<RasdButton />} />
           <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/newcomers" />} />
+          <Route path="*" element={<Navigate to={MAIN_ROUTE} />} />
         </Routes>
       </Suspense>
     </main>

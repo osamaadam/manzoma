@@ -131,6 +131,8 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
   );
 
   const handleSoldiersSearch = (value: string) => {
+    value = value.trim();
+    if (!value.length) return;
     if (soldiersSearchTimeoutRef.current)
       clearTimeout(soldiersSearchTimeoutRef.current);
 
@@ -142,22 +144,22 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
               marhla: {
                 equals: marhla,
               },
-              seglNo: {
-                equals: +value,
-              },
+              seglNo: !isNaN(+value)
+                ? {
+                    equals: +value,
+                  }
+                : undefined,
+              name: isNaN(+value)
+                ? {
+                    contains: value,
+                  }
+                : undefined,
             },
           },
         }),
       500
     );
   };
-
-  const handleKeyUp: React.KeyboardEventHandler<HTMLFormElement> = useCallback(
-    (e) => {
-      if (e.key === "Enter") form.submit();
-    },
-    [form]
-  );
 
   return (
     <Modal
@@ -169,12 +171,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
       confirmLoading={mTawLoading}
       destroyOnClose
     >
-      <Form
-        onKeyUp={handleKeyUp}
-        form={form}
-        name="add-tawzea"
-        onFinish={submit}
-      >
+      <Form form={form} name="add-tawzea" onFinish={submit}>
         <Form.Item
           label="التوزيعة المعنية"
           name="receivedTawzea"
@@ -246,7 +243,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                     ]}
                   >
                     <Select
-                      placeholder="رقم السجل"
+                      placeholder="الجندي"
                       loading={soldiersLoading}
                       showSearch
                       allowClear
@@ -257,7 +254,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                         <Select.Option
                           key={`index-${sol.militaryNo}`}
                           value={sol.militaryNo}
-                          title={sol.seglNo.toString()}
+                          title={`${sol.name} (${sol.seglNo})`}
                         >
                           {sol.name} ({sol.seglNo})
                         </Select.Option>
