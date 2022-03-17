@@ -17,6 +17,7 @@ import { registerTawzeaMutation } from "../graphql/registerTawzea.mutation";
 import { miniSoldierQuery } from "../graphql/soldiers.query";
 import { specsQuery } from "../graphql/specs.query";
 import { unitsQuery } from "../graphql/units.query";
+import { parseMilitaryNumber } from "../helpers/parseMilitaryNumber";
 import { useAppSelector } from "../redux/hooks";
 import "./tawzea-modal.less";
 
@@ -73,9 +74,7 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
     variables: { take: 50 },
   });
 
-  const submit = (values: any) => {
-    mutateTawzeas({ variables: values });
-  };
+  const submit = async (values: any) => mutateTawzeas({ variables: values });
 
   const handleUnitSearch = useCallback(
     (val: string) => {
@@ -101,10 +100,12 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
   );
 
   const handleSpecsSearch = useCallback(
-    (val: string) => {
+    (val: string, militaryNo: string | number) => {
       if (val.length) {
         if (specsSearchTimeoutRef.current)
           clearTimeout(specsSearchTimeoutRef.current);
+
+        const parsedMilitaryNo = parseMilitaryNumber(militaryNo);
 
         specsSearchTimeoutRef.current = setTimeout(
           () =>
@@ -118,7 +119,9 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                     },
                   },
                   {
-                    weaponId: { in: [weaponId, 26] },
+                    weaponId: {
+                      equals: parsedMilitaryNo?.weaponId ?? weaponId,
+                    },
                   },
                 ],
               },
@@ -169,9 +172,13 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
       onCancel={() => setIsVisible(false)}
       width={1200}
       confirmLoading={mTawLoading}
-      destroyOnClose
     >
-      <Form form={form} name="add-tawzea" onFinish={submit}>
+      <Form
+        form={form}
+        name="add-tawzea"
+        onFinish={submit}
+        initialValues={{ tawzeas: [undefined] }}
+      >
         <Form.Item
           label="التوزيعة المعنية"
           name="receivedTawzea"
@@ -210,10 +217,11 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
             showSearch
             allowClear
             onSearch={handleUnitSearch}
-            optionFilterProp="title"
+            optionFilterProp="data-search"
           >
             {unitData?.units.map((unit) => (
               <Select.Option
+                data-search={`${unit.name} ${unit.etgah?.name}`}
                 key={unit.id}
                 value={unit.id}
                 title={`${unit.name} (${unit.etgah?.name})`}
@@ -239,7 +247,10 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                     key={`militaryNo-${index}`}
                     className="tawzea-modal__input-grp__flex-medium-input"
                     rules={[
-                      { required: true, message: "يرجى ادخال رقم السجل" },
+                      {
+                        required: true,
+                        message: "يرجى ادخال اسم الجندي او رقم سجله",
+                      },
                     ]}
                   >
                     <Select
@@ -247,12 +258,13 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                       loading={soldiersLoading}
                       showSearch
                       allowClear
-                      optionFilterProp="title"
+                      optionFilterProp="data-search"
                       onSearch={handleSoldiersSearch}
                     >
                       {soldiersData?.miniSoldiers.map((sol) => (
                         <Select.Option
-                          key={`index-${sol.militaryNo}`}
+                          data-search={`${sol.name} ${sol.seglNo}`}
+                          key={`${index}-${sol.militaryNo}`}
                           value={sol.militaryNo}
                           title={`${sol.name} (${sol.seglNo})`}
                         >
@@ -262,29 +274,52 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                     </Select>
                   </Form.Item>
                   <Form.Item
-                    {...field}
-                    key={`spec-${index}`}
-                    className="tawzea-modal__input-grp__flex-large-input"
-                    name={[field.name, "spec"]}
+                    noStyle
+                    shouldUpdate={(prev, cur) =>
+                      prev.tawzeas[index]?.militaryNo !==
+                      cur.tawzeas[index]?.militaryNo
+                    }
                   >
-                    <Select
-                      placeholder="التخصص"
-                      loading={specsLoading}
-                      showSearch
-                      allowClear
-                      onSearch={handleSpecsSearch}
-                      optionFilterProp="title"
-                    >
-                      {specsData?.specializations.map((spec) => (
-                        <Select.Option
-                          key={spec.id}
-                          value={spec.id}
-                          title={spec.name}
+                    {() => (
+                      <Form.Item
+                        {...field}
+                        key={`spec-${index}`}
+                        className="tawzea-modal__input-grp__flex-large-input"
+                        name={[field.name, "spec"]}
+                      >
+                        <Select
+                          disabled={
+                            !form.getFieldValue([
+                              "tawzeas",
+                              field.name,
+                              "militaryNo",
+                            ])
+                          }
+                          placeholder="التخصص"
+                          loading={specsLoading}
+                          showSearch
+                          allowClear
+                          onSearch={(val) =>
+                            handleSpecsSearch(
+                              val,
+                              form.getFieldValue("tawzeas")[index]?.militaryNo
+                            )
+                          }
+                          optionFilterProp="data-search"
                         >
-                          {spec.name}
-                        </Select.Option>
-                      ))}
-                    </Select>
+                          {specsData?.specializations.map((spec) => (
+                            <Select.Option
+                              data-search={spec.name}
+                              key={spec.id}
+                              value={spec.id}
+                              title={spec.name}
+                            >
+                              {spec.name}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    )}
                   </Form.Item>
                   <Form.Item
                     {...field}
@@ -304,14 +339,17 @@ const TawzeaModal: FC<Props> = ({ isVisible, setIsVisible }) => {
                       style={{ width: "100%" }}
                       placeholder="رقم الصفحة"
                       autoComplete="off"
-                      onChange={(val) =>
-                        console.log({ val, pages: selectedTawzea?.numOfPages })
-                      }
                     />
                   </Form.Item>
-                  <Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(field.name)} />
-                  </Form.Item>
+                  {index !== 0 ? (
+                    <Form.Item>
+                      <MinusCircleOutlined
+                        onClick={() => {
+                          remove(field.name);
+                        }}
+                      />
+                    </Form.Item>
+                  ) : null}
                 </Input.Group>
               ))}
               <Form.Item>
