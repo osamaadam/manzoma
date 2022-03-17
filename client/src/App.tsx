@@ -29,6 +29,7 @@ const App = () => {
   const Login = lazy(() => import("./routes/login"));
   const NewComersForm = lazy(() => import("./components/NewComersForm"));
   const RasdButton = lazy(() => import("./components/RasdButton"));
+  const StudioBahga = lazy(() => import("./routes/studio-bahga"));
 
   useEffect(() => {
     axios.interceptors.response.use((res) => {
@@ -75,6 +76,7 @@ const App = () => {
           <Route path="/newcomers" element={<Newcomers />} />
           <Route path="/newcomers/register" element={<NewComersForm />} />
           <Route path="/report/rasd" element={<RasdButton />} />
+          <Route path="/newcomers/studio-bahga" element={<StudioBahga />} />
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<Navigate to={MAIN_ROUTE} />} />
         </Routes>

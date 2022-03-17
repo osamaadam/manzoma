@@ -16,11 +16,14 @@ const NavBar = () => {
     <>
       <Menu mode="horizontal">
         <SubMenu key="newcomers" title="المستجدين" disabled={!isLoggedIn}>
-          <Menu.Item key="list">
+          <Menu.Item key="/newcomers">
             <Link to="/newcomers">قائمة المستجدين</Link>
           </Menu.Item>
-          <Menu.Item key="register">
+          <Menu.Item key="/newcomers/register">
             <Link to="/newcomers/register">تسجيل</Link>
+          </Menu.Item>
+          <Menu.Item key="/newcomers/studio-bahga">
+            <Link to="/newcomers/studio-bahga">تصوير</Link>
           </Menu.Item>
         </SubMenu>
         <SubMenu key="export" title="تصدير" disabled={!isLoggedIn}>
