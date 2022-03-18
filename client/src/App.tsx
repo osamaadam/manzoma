@@ -16,6 +16,7 @@ import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { logout, selectToken } from "./redux/slices/user.slice";
 
 const MAIN_ROUTE = "/newcomers";
+const LOGIN_ROUTE = "/login";
 
 const App = () => {
   const user = useAppSelector((state) => state.user);
@@ -58,7 +59,7 @@ const App = () => {
 
   useEffect(() => {
     if (!user.isLoggedIn && location.pathname !== "/login") {
-      navigate("/login", { replace: true });
+      navigate(LOGIN_ROUTE);
     } else if (
       user.isLoggedIn &&
       user.details.status === "succeeded" &&
@@ -75,7 +76,7 @@ const App = () => {
         <Routes>
           <Route path="/newcomers" element={<Newcomers />} />
           <Route path="/newcomers/register" element={<NewComersForm />} />
-          <Route path="/report/rasd" element={<RasdButton />} />
+          <Route path="/export/rasd" element={<RasdButton />} />
           <Route path="/newcomers/studio-bahga" element={<StudioBahga />} />
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<Navigate to={MAIN_ROUTE} />} />
