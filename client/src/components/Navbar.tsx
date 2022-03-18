@@ -51,9 +51,13 @@ const NavBar = () => {
             اضافة توزيعات
           </Menu.Item>
         </SubMenu>
-        {isLoggedIn ? (
-          <Menu.Item onClick={() => dispatch(logout())}>تسجيل الخروج</Menu.Item>
-        ) : null}
+        <Menu.Item
+          disabled={!isLoggedIn}
+          key="logout"
+          onClick={() => dispatch(logout())}
+        >
+          تسجيل الخروج
+        </Menu.Item>
       </Menu>
       <TawzeaModal
         isVisible={isTawzeaVisible}

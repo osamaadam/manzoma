@@ -1,14 +1,16 @@
+import "reflect-metadata";
+
+import { applyResolversEnhanceMap } from "@generated/type-graphql";
 import { PrismaClient } from "@prisma/client";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { ApolloServer } from "apollo-server-express";
 import cors from "cors";
 import express from "express";
 import jwt from "jsonwebtoken";
-import logger from "./logger";
 import { resolve } from "path";
-import "reflect-metadata";
-import { buildSchema } from "type-graphql";
-import { refreshToken } from "./middleware/refreshToken";
+import { Authorized, buildSchema } from "type-graphql";
+import logger from "./logger";
+import { authChecker } from "./middleware/authChecker";
 import formDataRouter from "./routes/formData";
 import rasdRouter from "./routes/gendoc";
 import getRouter from "./routes/getSoldier";
@@ -26,9 +28,18 @@ export interface Context {
 require("dotenv").config({ path: resolve(__dirname, "..", ".env") });
 
 const main = async () => {
+  applyResolversEnhanceMap({
+    Soldier: {
+      _all: [Authorized()],
+    },
+    Unit: {
+      _all: [Authorized()],
+    },
+  });
+
   const schema = await buildSchema({
     resolvers: [resolve(__dirname, "graphql", "resolvers", "*.resolver.ts")],
-    validate: false,
+    authChecker,
   });
 
   const prisma = new PrismaClient({
@@ -66,7 +77,6 @@ const main = async () => {
     })
   );
   app.use(express.json());
-  app.use(refreshToken);
 
   await apolloServer.start();
   apolloServer.applyMiddleware({ app });

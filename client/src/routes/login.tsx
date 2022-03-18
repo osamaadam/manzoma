@@ -26,7 +26,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="login__container">
-      <Form name="login-form" onFinish={onFinish}>
+      <Form layout="vertical" name="login-form" onFinish={onFinish}>
         <Form.Item
           name="username"
           label="اسم المستخدم"
