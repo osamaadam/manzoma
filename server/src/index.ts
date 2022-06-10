@@ -1,5 +1,7 @@
+// Has to be imported first.
 import "reflect-metadata";
 
+// Rest of the imports.
 import { applyResolversEnhanceMap } from "@generated/type-graphql";
 import { PrismaClient } from "@prisma/client";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
